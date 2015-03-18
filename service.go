@@ -27,6 +27,7 @@ func main() {
 
 
 	r.HandleFunc("/svc/clip/team", clip.CreateTeamHandler).Methods("POST")
+	r.HandleFunc("/svc/clip/teams", GetTeamsHandler).Methods("GET")
 	r.HandleFunc("/svc/clip/team/{name:[a-zA-Z0-9\\.\\-_]+}", clip.UpdateTeamHandler).Methods("PUT")
 	r.HandleFunc("/svc/clip/team/{name:[a-zA-Z0-9 \\%\\.\\-_]+}", clip.GetTeamHandler).Methods("GET")
 	r.HandleFunc("/svc/clip/team/{name:[a-zA-Z0-9 \\%\\.\\-_]+}", clip.DeleteTeamHandler).Methods("DELETE")
