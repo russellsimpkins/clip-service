@@ -20,7 +20,7 @@ func HelloWorld(writer http.ResponseWriter, req *http.Request) {
 func main() {
 
 	r := mux.NewRouter()
-	r.HandleFunc("/svc/clip/{application}", HelloWorld)
+
 	r.HandleFunc("/svc/clip/user/{email:[a-zA-Z0-9\\.\\-\\@]+}", clip.CreateUserHandler).Methods("POST")
 	r.HandleFunc("/svc/clip/user/{email:[a-zA-Z0-9\\.\\-\\@]+}", clip.UpdateUserHandler).Methods("PUT")
 	r.HandleFunc("/svc/clip/user/{email:[a-zA-Z0-9\\.\\-\\@]+}", clip.FetchUserHandler).Methods("GET")
