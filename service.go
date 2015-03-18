@@ -24,6 +24,11 @@ func main() {
 	r.HandleFunc("/svc/clip/user/{email:[a-zA-Z0-9\\.\\-\\@]+}", clip.CreateUserHandler).Methods("POST")
 	r.HandleFunc("/svc/clip/user/{email:[a-zA-Z0-9\\.\\-\\@]+}", clip.UpdateUserHandler).Methods("PUT")
 	r.HandleFunc("/svc/clip/user/{email:[a-zA-Z0-9\\.\\-\\@]+}", clip.FetchUserHandler).Methods("GET")
+
+
+	r.HandleFunc("/svc/clip/team/{name:[a-zA-Z0-9\\.\\-_]+}", clip.CreateTeamHandler).Methods("POST")
+	//r.HandleFunc("/svc/clip/team/{name:[a-zA-Z0-9\\.\\-_]+}", clip.UpdateTeamHandler).Methods("PUT")
+	r.HandleFunc("/svc/clip/team/{name:[a-zA-Z0-9\\.\\-_]+}", clip.GetTeamHandler).Methods("GET")
 	
 	srv := &http.Server{
         Handler:        r,
