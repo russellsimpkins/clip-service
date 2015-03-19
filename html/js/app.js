@@ -111,12 +111,77 @@ var EnvironmentFlag = React.createClass({
   }
 });
 
+
 var MainScreen = React.createClass({
+
+  getInitialState: function() {
+    return { teamData: {} };
+  },
+
+  componentDidMount: function() {
+    $.get(this.props.source, function(result) {
+      var jsonData;
+      if (this.isMounted()) {
+        console.log(result);
+        jsonData = JSON.parse(result);
+        this.setState({
+          teamData: jsonData
+        });
+        if (!currentData.token) {
+          currentData.token = jsonData.tokens[0];
+        }
+      }
+    }.bind(this));
+  },
+
+
   render: function() {
-    var app;
+    if ($.isEmptyObject(this.state.teamData)) {
+      return false;
+    }
+
+    console.log(this.state.teamData);
+
+    // var teamTokens = this.state.teamData.tokens.map(function (team) {
+    //   return (
+    //     <Token data={team} />
+    //   );
+    // });
+    return (
+      <div className="row">
+      <div className="dropdown col-sm-12">
+        Token: <button className="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+          Dropdown
+          <span className="caret"></span>
+        </button>
+        <ul className="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+          <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>
+          <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a></li>
+          <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Something else here</a></li>
+          <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+        </ul>
+      </div>
+      </div>
+    );
+  }
+});
+
+
+//"{\"name\":\"Test\",\"users\":null,\"tokens\":[{\"team\":\"Test\",\"crc32\":1949307765,\"token\":\"3b374f7cea1e21b8fa4edb8950e0c7f6de078282fd85314f3a4d4294a62c92fe\",\"apps\":{\"doughnuts\":{\"features\":{\"chocolate\":{\"attributes\":{\"displayFE\":1},\"sbx\":1,\"dev\":1,\"stg\":0,\"int\":0,\"prd\":0}}}}}]}"
+
+var HeadMainScreen = React.createClass({
+  render: function() {
+    var app, sourceUrl;
     if (!this.props.data.team) {
       app = <TeamList source="/svc/clip/teams" />;
     }
+
+    else {
+      sourceUrl = "/svc/clip/team/" + this.props.data.team
+      //source = "/svc/clip/team/" + this.props.data.team
+      app = <MainScreen source={sourceUrl} />;
+    }
+
     return(
       <div>
         {app}
@@ -132,8 +197,9 @@ var currentAppData = {
 };
 
 var run = function() {
+  console.log(currentAppData);
   // Main APP
-  React.render(<MainScreen data={currentAppData} />, document.getElementById('content'));
+  React.render(<HeadMainScreen data={currentAppData} />, document.getElementById('content'));
 }
 
 run();
