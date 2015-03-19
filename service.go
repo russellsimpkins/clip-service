@@ -25,17 +25,17 @@ func main() {
 
 	r.HandleFunc("/svc/clip/team", clip.CreateTeamHandler).Methods("POST")
 	r.HandleFunc("/svc/clip/teams", clip.GetTeamsHandler).Methods("GET")
-	r.HandleFunc("/svc/clip/team/{name:[a-zA-Z0-9\\.\\-_]+}", clip.UpdateTeamHandler).Methods("PUT")
-	r.HandleFunc("/svc/clip/team/{name:[a-zA-Z0-9 \\%\\.\\-_]+}", clip.GetTeamHandler).Methods("GET")
-	r.HandleFunc("/svc/clip/team/{name:[a-zA-Z0-9 \\%\\.\\-_]+}", clip.DeleteTeamHandler).Methods("DELETE")
+	r.HandleFunc("/svc/clip/team/{team:[a-zA-Z0-9 \\.\\-_]+}", clip.UpdateTeamHandler).Methods("PUT")
+	r.HandleFunc("/svc/clip/team/{team:[a-zA-Z0-9 \\%\\.\\-_]+}", clip.GetTeamHandler).Methods("GET")
+	r.HandleFunc("/svc/clip/team/{team:[a-zA-Z0-9 \\%\\.\\-_]+}", clip.DeleteTeamHandler).Methods("DELETE")
 
-	r.HandleFunc("/svc/clip/team/{name:[a-zA-Z0-9\\.\\-_]+}/token",
+	r.HandleFunc("/svc/clip/team/{team:[a-zA-Z0-9 \\.\\-_]+}/token",
 		clip.CreateTokenHandler).Methods("POST")
-	r.HandleFunc("/svc/clip/team/{name:[a-zA-Z0-9\\.\\-_]+}/token/{token:[a-zA-Z0-9]+}",
+	r.HandleFunc("/svc/clip/team/{team:[a-zA-Z0-9 \\.\\-_]+}/token/{token:[a-zA-Z0-9]+}",
 		clip.UpdateTokenHandler).Methods("PUT")
-	r.HandleFunc("/svc/clip/team/{name:[a-zA-Z0-9 \\%\\.\\-_]+}/token/{token:[a-zA-Z0-9]+}",
+	r.HandleFunc("/svc/clip/team/{team:[a-zA-Z0-9 \\%\\.\\-_]+}/token/{token:[a-zA-Z0-9]+}",
 		clip.GetTokenHandler).Methods("GET")
-	r.HandleFunc("/svc/clip/team/{name:[a-zA-Z0-9 \\%\\.\\-_]+}/token/{token:[a-zA-Z0-9]+}",
+	r.HandleFunc("/svc/clip/team/{team:[a-zA-Z0-9 \\%\\.\\-_]+}/token/{token:[a-zA-Z0-9]+}",
 		clip.DeleteTokenHandler).Methods("DELETE")
 
 	srv := &http.Server{
