@@ -1,141 +1,84 @@
-'use strict';
+"use strict";
 
-var CommentBox = React.createClass({
+var TeamList = React.createClass({
   render: function() {
-    return (
-      <div className="commentBox">
-        Hello, world! I am a CommentBox.
-      </div>
-    );
-  }
-});
-React.render(
-  <CommentBox />,
-  document.getElementById('content')
-);
-
-// Simple pure-React component so we don't have to remember
-// Bootstrap's classes
-var BootstrapButton = React.createClass({
-  render: function() {
-    return (
-      <a {...this.props}
-        href="javascript:;"
-        role="button"
-        className={(this.props.className || '') + ' btn'} />
-    );
-  }
-});
-
-var BootstrapModal = React.createClass({
-  // The following two methods are the only places we need to
-  // integrate Bootstrap or jQuery with the components lifecycle methods.
-  componentDidMount: function() {
-    // When the component is added, turn it into a modal
-    $(this.getDOMNode())
-      .modal({backdrop: 'static', keyboard: false, show: false})
-  },
-  componentWillUnmount: function() {
-    $(this.getDOMNode()).off('hidden', this.handleHidden);
-  },
-  close: function() {
-    $(this.getDOMNode()).modal('hide');
-  },
-  open: function() {
-    $(this.getDOMNode()).modal('show');
-  },
-  render: function() {
-    var confirmButton = null;
-    var cancelButton = null;
-
-    if (this.props.confirm) {
-      confirmButton = (
-        <BootstrapButton
-          onClick={this.handleConfirm}
-          className="btn-primary">
-          {this.props.confirm}
-        </BootstrapButton>
+    var teamNodes = this.props.data.map(function (team) {
+      return (
+        <Team data={team.teamName}/>
       );
-    }
-    if (this.props.cancel) {
-      cancelButton = (
-        <BootstrapButton onClick={this.handleCancel} className="btn-default">
-          {this.props.cancel}
-        </BootstrapButton>
-      );
-    }
-
+    });
     return (
-      <div className="modal fade">
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <button
-                type="button"
-                className="close"
-                onClick={this.handleCancel}>
-                &times;
-              </button>
-              <h3>{this.props.title}</h3>
-            </div>
-            <div className="modal-body">
-              {this.props.children}
-            </div>
-            <div className="modal-footer">
-              {cancelButton}
-              {confirmButton}
-            </div>
+      <div className="col-sm-6 bootcards-list col-centered">
+        <div className="panel panel-default">
+          <div className="list-group">
+            {teamNodes}
           </div>
         </div>
       </div>
     );
-  },
-  handleCancel: function() {
-    if (this.props.onCancel) {
-      this.props.onCancel();
-    }
-  },
-  handleConfirm: function() {
-    if (this.props.onConfirm) {
-      this.props.onConfirm();
-    }
   }
 });
 
-var Flags = React.createClass({
-  handleCancel: function() {
-    if (confirm('Are you sure you want to cancel?')) {
-      this.refs.modal.close();
-    }
-  },
+var Team = React.createClass({
   render: function() {
-    var modal = null;
-    modal = (
-      <BootstrapModal
-        ref="modal"
-        confirm="OK"
-        cancel="Cancel"
-        onCancel={this.handleCancel}
-        onConfirm={this.closeModal}
-        title="Hello, Bootstrap!">
-          This is a React component powered by jQuery and Bootstrap!
-      </BootstrapModal>
-    );
     return (
-      <div className="example">
-        {modal}
-        <BootstrapButton onClick={this.openModal} className="btn-default">
-          Open modal
-        </BootstrapButton>
+      <a className="list-group-item" href="#">
+        <h4 className="list-group-item-heading">{this.props.data}</h4>
+      </a>
+    );
+  }
+});
+
+var FeatureCard = React.createClass({
+  render: function() {
+    return (
+      <div className="col-sm-4">
+        <div className="panel panel-default bootcards-summary">
+          <div className="panel-heading">
+            <h3 className="panel-title">usePapiBlogs</h3>
+          </div>
+          <div className="panel-body">
+            <EnvList />
+          </div>
+          <div className="panel-footer">
+            <span className="enableAttr"><i className="fa fa-check-circle"></i> FrontEndEnabled</span>
+          </div>
+        </div>
       </div>
     );
-  },
-  openModal: function() {
-    this.refs.modal.open();
-  },
-  closeModal: function() {
-    this.refs.modal.close();
   }
 });
 
-React.render(<Example />, document.getElementById('jqueryexample'));
+var EnvList = React.createClass({
+  render: function() {
+    return (
+      <div className="row">
+        <EnvironmentFlag env="sbx"/>
+        <EnvironmentFlag env="dev"/>
+        <EnvironmentFlag env="stg"/>
+        <EnvironmentFlag env="prd"/>
+      </div>
+    );
+  }
+});
+
+var EnvironmentFlag = React.createClass({
+  render: function() {
+    return (
+      <div className="col-xs-6 col-sm-4">
+        <a className="bootcards-summary-item" href="#">
+          <i className="fa fa-3x fa-star"></i>
+          <h4>{this.props.env}<span className="label label-danger">!</span></h4>
+        </a>
+      </div>
+    );
+  }
+});
+
+var teamData = [
+  {teamName: "DataUniverse"},
+  {teamName: "MobileWeb"}
+];
+
+React.render(<TeamList data={teamData} />, document.getElementById('content'));
+

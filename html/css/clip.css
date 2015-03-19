@@ -2,8 +2,14 @@ body {
   background: #fff;
 }
 
+.col-centered{
+    float: none;
+    margin: 0 auto;
+}
+
 .col-sm-4 {
-  padding-right: 0px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 
 .panel {
