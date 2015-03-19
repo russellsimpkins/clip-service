@@ -202,15 +202,24 @@ var FeatureCard = React.createClass({
 var EnvironmentFlag = React.createClass({
   getInitialState: function() {
     return ({
-      active: (this.props.data === 1),
-      change: false
+        active: (this.props.data === 1),
+        change: false
     })
+  },
+    handleClick: function(event) {
+        if (this.state.change) {
+            this.state.change = false;
+        } else {
+            this.state.change = true;
+            this.state.active = 0;
+        }
+      run();
   },
   render: function() {
     console.log(this.state);
     return (
       <div className="col-xs-6 col-sm-4">
-        <a className="bootcards-summary-item {this.state.active === true ? active : }" href="#">
+        <a className="bootcards-summary-item {this.state.active === true ? active : false}" href="#" onClick={this.handleClick}>
           <i className="fa fa-3x fa-star"></i>
           <h4>{this.props.env}{this.state.change ? <span className="label label-danger">!</span> : ''}</h4>
         </a>
@@ -296,7 +305,6 @@ var HeadMainScreen = React.createClass({
   },
   render: function() {
     var app = this.selectApp();
-
     return(
       <div>
         {app}
