@@ -1,6 +1,12 @@
 "use strict";
 
 var TeamList = React.createClass({
+  getInitialState: function() {
+    if (currentAppData.team) {
+      return { showteamlist: false };
+    }
+    return { showteamlist: true };
+  },
   render: function() {
     var teamNodes = this.props.data.map(function (team) {
       return (
@@ -20,11 +26,27 @@ var TeamList = React.createClass({
 });
 
 var Team = React.createClass({
+  handleClick: function(event) {
+    currentAppData.team = this.props.data;
+    run();
+  },
   render: function() {
     return (
-      <a className="list-group-item" href="#">
+      <a className="list-group-item" href="#" onClick={this.handleClick}>
         <h4 className="list-group-item-heading">{this.props.data}</h4>
       </a>
+    );
+  }
+});
+
+var NewTeamForm = React.createClass({
+  render: function() {
+    return (
+      <form className="commentForm">
+        <input type="text" placeholder="Your name" />
+        <input type="text" placeholder="Say something..." />
+        <input type="submit" value="Post" />
+      </form>
     );
   }
 });
@@ -75,10 +97,31 @@ var EnvironmentFlag = React.createClass({
   }
 });
 
+var MainScreen = React.createClass({
+  render: function() {
+    var app;
+    if (!this.props.data.team) {
+      app = <TeamList data={teamData} />;
+    }
+    return(
+      <div>
+        {app}
+      </div>
+    );
+  }
+});
+
 var teamData = [
   {teamName: "DataUniverse"},
   {teamName: "MobileWeb"}
 ];
 
-React.render(<TeamList data={teamData} />, document.getElementById('content'));
+var currentAppData = {
+};
 
+var run = function() {
+  // Main APP
+  React.render(<MainScreen data={currentAppData} />, document.getElementById('content'));
+}
+
+run();
