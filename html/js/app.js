@@ -206,11 +206,21 @@ var EnvironmentFlag = React.createClass({
       change: false
     })
   },
+  handleClick: function() {
+    console.log(this.props);
+    this.setState({
+      active: !this.state.active,
+      change: !this.state.change
+    });
+  },
   render: function() {
-    console.log(this.state);
+    var classes = "bootcards-summary-item";
+    if (this.state.active) {
+      classes += " active";
+    }
     return (
       <div className="col-xs-6 col-sm-4">
-        <a className="bootcards-summary-item {this.state.active === true ? active : }" href="#">
+        <a className={classes} onClick={this.handleClick}>
           <i className="fa fa-3x fa-star"></i>
           <h4>{this.props.env}{this.state.change ? <span className="label label-danger">!</span> : ''}</h4>
         </a>
