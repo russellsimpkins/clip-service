@@ -16,7 +16,6 @@ var TeamList = React.createClass({
     }.bind(this));
   },
 
-
   render: function() {
     if ($.isEmptyObject(this.state.teamList)) {
       return false;
@@ -53,28 +52,142 @@ var Team = React.createClass({
   }
 });
 
-var NewTeamForm = React.createClass({
+
+var TokenList = React.createClass({
+
+  getInitialState: function() {
+    return { teamData: {} };
+  },
+
+  componentDidMount: function() {
+    $.get(this.props.source, function(result) {
+      var jsonData;
+      if (this.isMounted()) {
+        jsonData = JSON.parse(result);
+        this.setState({
+          teamData: jsonData
+        });
+      }
+    }.bind(this));
+  },
+
   render: function() {
+    if ($.isEmptyObject(this.state.teamData)) {
+      return false;
+    }
+
+    var tokenNodes = this.state.teamData.tokens.map(function (token) {
+      return (
+        <Token data={token} />
+      );
+    });
+
     return (
-      <form className="commentForm">
-        <input type="text" placeholder="Your name" />
-        <input type="text" placeholder="Say something..." />
-        <input type="submit" value="Post" />
-      </form>
+      <div className="col-sm-6 bootcards-list col-centered">
+        <div className="panel panel-default">
+          <div className="list-group">
+            {tokenNodes}
+          </div>
+        </div>
+      </div>
     );
   }
 });
 
+var Token = React.createClass({
+  handleClick: function(event) {
+    currentAppData.token = this.props.data;
+    currentAppData.apps  = this.props.data.apps;
+    run();
+  },
+  render: function() {
+    return (
+      <a className="list-group-item" href="#" onClick={this.handleClick}>
+        <h4 className="list-group-item-heading">{this.props.data.name}</h4>
+      </a>
+    );
+  }
+});
+
+
+var ApplicationGroups = React.createClass({
+
+  getInitialState: function() {
+    return { apps: currentAppData.apps };
+  },
+
+  componentDidMount: function() {
+    if (!this.state.apps) {
+      //TODO
+      // $.get(this.props.source, function(result) {
+      //   if (this.isMounted()) {
+      //     this.setState({
+      //       apps: JSON.parse(result)
+      //     });
+      //   }
+      // }.bind(this));
+    }
+  },
+
+  render: function() {
+    if ($.isEmptyObject(this.state.apps)) {
+      return false;
+    }
+
+    var appNames = Object.keys(this.state.apps);
+    var appData = this.state.apps;
+    var appList = appNames.map(function (appName) {
+      return (
+        <div className="col-sm-12">
+          <h3 className="row">Application: {appName}</h3>
+          <div className="row">
+            <FeatureCardGroup data={appData[appName].features} />
+          </div>
+        </div>
+      );
+    });
+    return (
+      <div>{appList}</div>
+    );
+  }
+});
+
+var FeatureCardGroup = React.createClass({
+
+  render: function() {
+
+    var featureNames = Object.keys(this.props.data);
+    var featureData = this.props.data;
+    var featureList = featureNames.map(function (feature) {
+      return (
+        <FeatureCard data={featureData[feature]} featureName={feature} />
+      )
+    });
+    return (
+      <div>{featureList}</div>
+    );
+  }
+});
+
+
+
 var FeatureCard = React.createClass({
+
   render: function() {
     return (
       <div className="col-sm-4">
         <div className="panel panel-default bootcards-summary">
           <div className="panel-heading">
-            <h3 className="panel-title">usePapiBlogs</h3>
+            <h3 className="panel-title">{this.props.featureName}</h3>
           </div>
           <div className="panel-body">
-            <EnvList />
+            <div className="row">
+              <EnvironmentFlag env="sbx" data={this.props.data.sbx}/>
+              <EnvironmentFlag env="dev" data={this.props.data.dev}/>
+              <EnvironmentFlag env="stg" data={this.props.data.stg}/>
+              <EnvironmentFlag env="int" data={this.props.data.int}/>
+              <EnvironmentFlag env="prd" data={this.props.data.prd}/>
+            </div>
           </div>
           <div className="panel-footer">
             <span className="enableAttr"><i className="fa fa-check-circle"></i> FrontEndEnabled</span>
@@ -85,26 +198,21 @@ var FeatureCard = React.createClass({
   }
 });
 
-var EnvList = React.createClass({
-  render: function() {
-    return (
-      <div className="row">
-        <EnvironmentFlag env="sbx"/>
-        <EnvironmentFlag env="dev"/>
-        <EnvironmentFlag env="stg"/>
-        <EnvironmentFlag env="prd"/>
-      </div>
-    );
-  }
-});
 
 var EnvironmentFlag = React.createClass({
+  getInitialState: function() {
+    return ({
+      active: (this.props.data === 1),
+      change: false
+    })
+  },
   render: function() {
+    console.log(this.state);
     return (
       <div className="col-xs-6 col-sm-4">
-        <a className="bootcards-summary-item" href="#">
+        <a className="bootcards-summary-item {this.state.active === true ? active : }" href="#">
           <i className="fa fa-3x fa-star"></i>
-          <h4>{this.props.env}<span className="label label-danger">!</span></h4>
+          <h4>{this.props.env}{this.state.change ? <span className="label label-danger">!</span> : ''}</h4>
         </a>
       </div>
     );
@@ -127,8 +235,8 @@ var MainScreen = React.createClass({
         this.setState({
           teamData: jsonData
         });
-        if (!currentData.token) {
-          currentData.token = jsonData.tokens[0];
+        if (!currentAppData.token) {
+          currentAppData.token = jsonData.tokens[0];
         }
       }
     }.bind(this));
@@ -140,7 +248,11 @@ var MainScreen = React.createClass({
       return false;
     }
 
-    console.log(this.state.teamData);
+    var tokenNodes = this.state.teamData.tokens.map(function (token) {
+      return (
+        <Token data={token} />
+      );
+    });
 
     // var teamTokens = this.state.teamData.tokens.map(function (team) {
     //   return (
@@ -150,15 +262,12 @@ var MainScreen = React.createClass({
     return (
       <div className="row">
       <div className="dropdown col-sm-12">
-        Token: <button className="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
-          Dropdown
+        <button className="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+          Choose Token
           <span className="caret"></span>
         </button>
         <ul className="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-          <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>
-          <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a></li>
-          <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Something else here</a></li>
-          <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+          {tokenNodes}
         </ul>
       </div>
       </div>
@@ -170,17 +279,23 @@ var MainScreen = React.createClass({
 //"{\"name\":\"Test\",\"users\":null,\"tokens\":[{\"team\":\"Test\",\"crc32\":1949307765,\"token\":\"3b374f7cea1e21b8fa4edb8950e0c7f6de078282fd85314f3a4d4294a62c92fe\",\"apps\":{\"doughnuts\":{\"features\":{\"chocolate\":{\"attributes\":{\"displayFE\":1},\"sbx\":1,\"dev\":1,\"stg\":0,\"int\":0,\"prd\":0}}}}}]}"
 
 var HeadMainScreen = React.createClass({
-  render: function() {
-    var app, sourceUrl;
+
+  selectApp: function() {
+    var sourceUrl;
+
     if (!this.props.data.team) {
-      app = <TeamList source="/svc/clip/teams" />;
+      return <TeamList source="/svc/clip/teams" />;
     }
 
-    else {
-      sourceUrl = "/svc/clip/team/" + this.props.data.team
-      //source = "/svc/clip/team/" + this.props.data.team
-      app = <MainScreen source={sourceUrl} />;
+    sourceUrl = "/svc/clip/team/" + this.props.data.team
+    if (!this.props.data.token) {
+      return <TokenList source={sourceUrl} />;
     }
+
+    return <ApplicationGroups source={sourceUrl} />;
+  },
+  render: function() {
+    var app = this.selectApp();
 
     return(
       <div>
@@ -193,8 +308,7 @@ var HeadMainScreen = React.createClass({
 
 //var teamData = {"teams":[{"teamName":"IOS"},{"teamName":"MobileWeb"},{"teamName":"Data Universe"},{"teamName":"WebTech"},{"teamName":"Search"}]};
 
-var currentAppData = {
-};
+var currentAppData = {};
 
 var run = function() {
   console.log(currentAppData);
