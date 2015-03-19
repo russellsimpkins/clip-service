@@ -1,16 +1,30 @@
 "use strict";
 
 var TeamList = React.createClass({
+
   getInitialState: function() {
-    if (currentAppData.team) {
-      return { showteamlist: false };
-    }
-    return { showteamlist: true };
+    return { teamList: {} };
   },
+
+  componentDidMount: function() {
+    $.get(this.props.source, function(result) {
+      if (this.isMounted()) {
+        this.setState({
+          teamList: JSON.parse(result)
+        });
+      }
+    }.bind(this));
+  },
+
+
   render: function() {
-    var teamNodes = this.props.data.map(function (team) {
+    if ($.isEmptyObject(this.state.teamList)) {
+      return false;
+    }
+
+    var teamNodes = this.state.teamList.teams.map(function (team) {
       return (
-        <Team data={team.teamName}/>
+        <Team data={team.teamName} />
       );
     });
     return (
@@ -101,7 +115,7 @@ var MainScreen = React.createClass({
   render: function() {
     var app;
     if (!this.props.data.team) {
-      app = <TeamList data={teamData.teams} />;
+      app = <TeamList source="/svc/clip/teams" />;
     }
     return(
       <div>
@@ -111,12 +125,8 @@ var MainScreen = React.createClass({
   }
 });
 
-var teamData = [
-  {teamName: "DataUniverse"},
-  {teamName: "MobileWeb"}
-];
 
-var teamData = {"teams":[{"teamName":"IOS"},{"teamName":"MobileWeb"},{"teamName":"Data Universe"},{"teamName":"WebTech"},{"teamName":"Search"}]};
+//var teamData = {"teams":[{"teamName":"IOS"},{"teamName":"MobileWeb"},{"teamName":"Data Universe"},{"teamName":"WebTech"},{"teamName":"Search"}]};
 
 var currentAppData = {
 };
