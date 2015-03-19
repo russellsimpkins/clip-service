@@ -189,8 +189,9 @@ var FeatureCard = React.createClass({
               <EnvironmentFlag env="prd" data={this.props.data.prd}/>
             </div>
           </div>
-          <div className="panel-footer">
-            <span className="enableAttr"><i className="fa fa-check-circle"></i> FrontEndEnabled</span>
+            <div className="panel-footer">
+            <FAttributeFlag data={this.props.data.attributes} />
+            
           </div>
         </div>
       </div>
@@ -198,7 +199,24 @@ var FeatureCard = React.createClass({
   }
 });
 
-
+var FAttributeFlag = React.createClass({
+    getInitialState: function() {
+        return({})
+    },
+    render: function() {
+        var attributeNames = Object.keys(this.props.data);
+        var attribs = this.props.data;
+        console.log(attribs);
+        var attribList = attributeNames.map(function (pair) {
+            return (
+                <div><span className="enableAttr" ><input type="text" value={pair} /> <input type="text" value={attribs[pair]}/></span></div>
+            )
+        });
+        return(
+                <div>{attribList}</div>
+        );
+    }
+});
 var EnvironmentFlag = React.createClass({
   getInitialState: function() {
     return ({
@@ -207,8 +225,7 @@ var EnvironmentFlag = React.createClass({
     })
   },
 
-  handleClick: function() {
-    console.log(this.props);
+    handleClick: function() {
     this.setState({
       active: !this.state.active,
       change: !this.state.change
