@@ -101,7 +101,7 @@ var MainScreen = React.createClass({
   render: function() {
     var app;
     if (!this.props.data.team) {
-      app = <TeamList data={teamData} />;
+      app = <TeamList data={teamData.teams} />;
     }
     return(
       <div>
@@ -115,6 +115,8 @@ var teamData = [
   {teamName: "DataUniverse"},
   {teamName: "MobileWeb"}
 ];
+
+var teamData = {"teams":[{"teamName":"IOS"},{"teamName":"MobileWeb"},{"teamName":"Data Universe"},{"teamName":"WebTech"},{"teamName":"Search"}]};
 
 var currentAppData = {
 };
