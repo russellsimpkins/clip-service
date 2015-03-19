@@ -1,0 +1,8 @@
+.git
+READM*
+tests
+rpm.spec
+.DS_Store
+.rsync-excludes
+.#*
+.gitignore
