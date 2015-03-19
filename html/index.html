@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+		<title>CLiP</title>
+		<link rel="stylesheet" href="/css/font-awesome.css">
+		<!-- Bootstrap -->
+		<link rel="stylesheet" href="/bootstrap/css/bootstrap.css">
+		<!-- Bootcards Theme -->
+		<link rel="stylesheet" href="/bootcards/css/bootcards-desktop-lite.css">
+		<link rel="stylesheet" href="/css/clip.css">
+		<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+		<!--[if lt IE 9]>
+		<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+		<![endif]-->
+	</head>
+	<body>
+		<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+			<div class="container">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					</button>
+				</div>
+				<button type="button" class="btn btn-default btn-back pull-left hidden" onclick="history.back()">
+				<i class="fa fa-lg fa-chevron-left"></i>
+				<span>Back</span>
+				</button>
+				<button type="button" class="btn btn-default btn-menu pull-left offcanvas-toggle">
+				<i class="fa fa-lg fa-bars"></i>
+				<span>Menu</span>
+				</button>
+				<a class="navbar-brand" title="Customers v{{getAppVersion}}" href="/">CLiP</a>
+				<div class="navbar-collapse collapse">
+					<ul class="nav navbar-nav">
+						<li class="active">
+							<a href="#">
+								<i class="fa fa-users"></i>
+								Team
+							</a>
+						</li>
+						<li>
+							<a href="#">
+								<i class="fa fa-ticket"></i>
+								Token
+							</a>
+						</li>
+						<li>
+							<a href="#">
+								<i class="fa fa-gears"></i>
+								Application
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="bootcards-cards">
+			<div class="col-sm-4">
+				<div class="panel panel-default bootcards-summary">
+					<div class="panel-heading">
+						<h3 class="panel-title">usePapiBlogs</h3>
+					</div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-xs-6 col-sm-4">
+								<a class="bootcards-summary-item active" href="#">
+									<i class="fa fa-3x fa-star-o"></i>
+									<h4>SBX <span class="label label-danger">!</span></h4>
+								</a>
+							</div>
+							<div class="col-xs-6 col-sm-4">
+								<a class="bootcards-summary-item" href="#">
+									<i class="fa fa-3x fa-star-o"></i>
+									<h4>DEV <span class="label label-danger">!</span></h4>
+								</a>
+							</div>
+							<div class="col-xs-6 col-sm-4">
+								<a class="bootcards-summary-item" href="#">
+									<i class="fa fa-3x fa-star-half-o"></i>
+									<h4>STG</h4>
+								</a>
+							</div>
+							<div class="col-xs-6 col-sm-4">
+								<a class="bootcards-summary-item" href="#">
+									<i class="fa fa-3x fa-star-half-o"></i>
+									<h4>INT</h4>
+								</a>
+							</div>
+							<div class="col-xs-6 col-sm-4">
+								<a class="bootcards-summary-item" href="#">
+									<i class="fa fa-3x fa-star"></i>
+									<h4>PROD<span class="label label-danger">!</span></h4>
+								</a>
+							</div>
+						</div>
+					</div>
+					<div class="panel-footer">
+						<small>
+						<span class="enableAttr"><i class="fa fa-check-circle"></i> FrontEndEnabled</span><br>
+						<span><i class="fa fa-circle-o"></i> Fsdcsd s sdkcds 878rontEndEnabled</span>
+						</small>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-4">
+				<div class="panel panel-default bootcards-summary">
+					<div class="panel-heading">
+						<h3 class="panel-title">Summary Card Heading</h3>
+					</div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-xs-6 col-sm-4">
+								<a class="bootcards-summary-item" href="#">
+									<i class="fa fa-3x fa-users"></i>
+									<h4>Contacts <span class="label label-info">432</span></h4>
+								</a>
+							</div>
+							<div class="col-xs-6 col-sm-4">
+								<a class="bootcards-summary-item" href="#">
+									<i class="fa fa-3x fa-building-o"></i>
+									<h4>Companies <span class="label label-info">98</span></h4>
+								</a>
+							</div>
+							<div class="col-xs-6 col-sm-4">
+								<a class="bootcards-summary-item" href="#">
+									<i class="fa fa-3x fa-clipboard"></i>
+									<h4>Notes <span class="label label-danger">54</span></h4>
+								</a>
+							</div>
+							<div class="col-xs-6 col-sm-4">
+								<a class="bootcards-summary-item" href="#">
+									<i class="fa fa-3x fa-files-o"></i>
+									<h4>Files <span class="label label-info">65</span></h4>
+								</a>
+							</div>
+							<div class="col-xs-6 col-sm-4">
+								<a class="bootcards-summary-item" href="#">
+									<i class="fa fa-3x fa-check-square-o"></i>
+									<h4>Tasks <span class="label label-warning">109</span></h4>
+								</a>
+							</div>
+						</div>
+					</div>
+					<div class="panel-footer">
+						<small>Built with Bootcards - Summary Card</small>
+					</div>
+				</div>
+				</div> <!-- end card -->
+			</div>
+			<div id="jqueryexample"></div>
+			<!-- React.js -->
+			<script src="/js/react.js"></script>
+			<script src="/js/JSXTransformer.js"></script>
+			<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+			<script src="/js/jquery-2.1.3.min.js"></script>
+			<!-- Include all compiled plugins (below), or include individual files as needed -->
+			<script src="/bootstrap/js/bootstrap.min.js"></script>
+			<script src="/bootcards/js/bootcards.min.js"></script>
+			<script type="text/jsx" src="/js/app.js"></script>
+		</body>
+	</html>

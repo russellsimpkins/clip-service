@@ -1,0 +1,58 @@
+body {
+  background: #fff;
+}
+
+.col-sm-4 {
+  padding-right: 0px;
+}
+
+.panel {
+  border-radius: 0;
+}
+
+.bootcards-summary .panel-body > .row > div {
+  padding: 2px;
+}
+
+.bootcards-summary-item {
+  padding: 10px;
+  height: 85px;
+}
+
+.bootcards-summary-item:hover {
+  background: #98E098
+}
+
+.bootcards-summary-item.active {
+  background: #00a830;
+}
+
+.bootcards-summary-item.active:hover {
+  background: #999;
+}
+
+
+.bootcards-summary-item.active > i,
+.bootcards-summary-item.active > h4
+{
+  color: #fff;
+}
+
+.bootcards-summary-item h4 {
+  color: #aaa;
+}
+
+.panel-footer {
+  padding: 5px 15px;
+  background-color: #fff;
+  border-radius: 0px;
+}
+
+
+.panel-footer small {
+  text-align: left;
+}
+
+.enableAttr {
+  color: #333;
+}
