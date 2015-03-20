@@ -197,7 +197,7 @@ var FeatureCard = React.createClass({
               <EnvironmentFlag env="prd" data={this.props.data.prd} meta={metaData} />
             </div>
           </div>
-          <AttributeList data={this.props.data.attributes} />
+          <AttributeList data={this.props.data.attributes} meta={metaData} />
         </div>
       </div>
     );
@@ -213,7 +213,6 @@ var EnvironmentFlag = React.createClass({
     })
   },
   handleClick: function(meta, env) {
-    console.log('CLICK', meta, env);
 
     // Change the data in the main object for saving later
     var tIdx = currentAppData.tokenIndex;
@@ -243,18 +242,14 @@ var EnvironmentFlag = React.createClass({
       this.state.change = false;
     }
     var classes = "bootcards-summary-item";
-    var labelClass = "label label-danger";
     if (this.state.active) {
       classes += " active";
-    }
-    if (!this.state.change) {
-      labelClass += " hidden";
     }
     return (
       <div className="col-xs-6 col-sm-4">
         <a className={classes} href="#" onClick={this.handleClick.bind(null, metaData, this.props.env)}>
           <i className="fa fa-3x fa-star"></i>
-          <h4>{this.props.env}{this.state.change ? <span className={labelClass}>!</span> : ''}</h4>
+          <h4>{this.props.env}{this.state.change ? <span className="label label-danger">!</span> : ''}</h4>
         </a>
       </div>
     );
@@ -264,11 +259,12 @@ var EnvironmentFlag = React.createClass({
 var AttributeList = React.createClass({
 
   render: function() {
+    var metaData = this.props.meta;
     var attribs = Object.keys(this.props.data);
     var attribData = this.props.data;
     var flagAttributes = attribs.map(function (attrib) {
       return (
-        <AttributeFlag key={attrib} data={attribData[attrib]} attribName={attrib} />
+        <AttributeFlag key={attrib} data={attribData[attrib]} attribName={attrib} meta={metaData}/>
       )
     });
     return (
@@ -286,7 +282,21 @@ var AttributeFlag = React.createClass({
         change: false
     })
   },
-  handleClick: function() {
+  handleClick: function(meta, attrib) {
+
+    console.log('CLICK', meta, attrib);
+
+    // Change the data in the main object for saving later
+    var tIdx = currentAppData.tokenIndex;
+    var val = currentAppData.teamData.tokens[tIdx].apps[meta.appName].features[meta.featureName].attributes[attrib];
+    if (val == true) {
+      val = false;
+    } else {
+      val = true;
+    }
+    currentAppData.teamData.tokens[tIdx].apps[meta.appName].features[meta.featureName].attributes[attrib] = val;
+
+
     if (this.state.change === false) {
       currentAppData.changeCount++;
     } else {
@@ -299,6 +309,10 @@ var AttributeFlag = React.createClass({
     renderSaveButton();
   },
   render: function() {
+    var metaData = this.props.meta;
+    if (metaData.refresh) {
+      this.state.change = false;
+    }
     var classes = "featureAttribute";
     var iconClasses = "fa";
     if (this.state.active) {
@@ -309,8 +323,9 @@ var AttributeFlag = React.createClass({
     }
     return (
       <span>
-        <a className={classes} onClick={this.handleClick}><i className={iconClasses}></i> FrontEndEnabled</a>
-        {this.state.change ? <span className="label label-danger">!</span> : ''}
+        <a className={classes} onClick={this.handleClick.bind(null, metaData, this.props.attribName)}>
+        <i className={iconClasses}></i> {this.props.attribName}</a>
+        {this.state.change ? <span className="label label-danger">!</span> : ''}<br/>
       </span>
     );
   }
