@@ -67,6 +67,7 @@ var TokenList = React.createClass({
         this.setState({
           teamData: jsonData
         });
+        currentAppData.teamData = jsonData;
       }
     }.bind(this));
   },
@@ -76,9 +77,9 @@ var TokenList = React.createClass({
       return false;
     }
 
-    var tokenNodes = this.state.teamData.tokens.map(function (token) {
+    var tokenNodes = this.state.teamData.tokens.map(function (token, tokenIndex) {
       return (
-        <Token data={token} />
+        <Token data={token} tokenIndex={tokenIndex} key={tokenIndex}/>
       );
     });
 
@@ -96,8 +97,7 @@ var TokenList = React.createClass({
 
 var Token = React.createClass({
   handleClick: function(event) {
-    currentAppData.token = this.props.data;
-    currentAppData.apps  = this.props.data.apps;
+    currentAppData.tokenIndex = this.props.tokenIndex;
     run();
   },
   render: function() {
@@ -113,7 +113,7 @@ var Token = React.createClass({
 var ApplicationGroups = React.createClass({
 
   getInitialState: function() {
-    return { apps: currentAppData.apps };
+    return { apps: currentAppData.teamData.tokens[currentAppData.tokenIndex].apps };
   },
 
   componentDidMount: function() {
@@ -138,10 +138,10 @@ var ApplicationGroups = React.createClass({
     var appData = this.state.apps;
     var appList = appNames.map(function (appName) {
       return (
-        <div className="col-sm-12">
+        <div className="col-sm-12" key={appName}>
           <h3 className="col-sm-12 row">Application: {appName}</h3>
           <div className="row">
-            <FeatureCardGroup data={appData[appName].features} />
+            <FeatureCardGroup data={appData[appName].features} meta={appName}/>
           </div>
         </div>
       );
@@ -158,12 +158,12 @@ var ApplicationGroups = React.createClass({
 var FeatureCardGroup = React.createClass({
 
   render: function() {
-
+    var meta = this.props.meta;
     var featureNames = Object.keys(this.props.data);
     var featureData = this.props.data;
     var featureList = featureNames.map(function (feature) {
       return (
-        <FeatureCard data={featureData[feature]} featureName={feature} />
+        <FeatureCard data={featureData[feature]} featureName={feature} key={feature} meta={meta} />
       )
     });
     return (
@@ -175,6 +175,10 @@ var FeatureCardGroup = React.createClass({
 
 var FeatureCard = React.createClass({
   render: function() {
+    var metaData = {
+      appName: this.props.meta,
+      featureName: this.props.featureName
+    };
     return (
       <div className="col-sm-4">
         <div className="panel panel-default bootcards-summary">
@@ -183,11 +187,11 @@ var FeatureCard = React.createClass({
           </div>
           <div className="panel-body">
             <div className="row">
-              <EnvironmentFlag env="sbx" data={this.props.data.sbx}/>
-              <EnvironmentFlag env="dev" data={this.props.data.dev}/>
-              <EnvironmentFlag env="stg" data={this.props.data.stg}/>
-              <EnvironmentFlag env="int" data={this.props.data.int}/>
-              <EnvironmentFlag env="prd" data={this.props.data.prd}/>
+              <EnvironmentFlag env="sbx" data={this.props.data.sbx} meta={metaData} />
+              <EnvironmentFlag env="dev" data={this.props.data.dev} meta={metaData} />
+              <EnvironmentFlag env="stg" data={this.props.data.stg} meta={metaData} />
+              <EnvironmentFlag env="int" data={this.props.data.int} meta={metaData} />
+              <EnvironmentFlag env="prd" data={this.props.data.prd} meta={metaData} />
             </div>
           </div>
           <AttributeList data={this.props.data.attributes} />
@@ -205,12 +209,25 @@ var EnvironmentFlag = React.createClass({
         change: false
     })
   },
-  handleClick: function() {
+  handleClick: function(meta, env) {
+    console.log('CLICK', meta, env);
+
+    // Change the data in the main object for saving later
+    var tIdx = currentAppData.tokenIndex;
+    var val = currentAppData.teamData.tokens[tIdx].apps[meta.appName].features[meta.featureName][env];
+    if (val == 0) {
+      val = 1;
+    } else {
+      val = 0;
+    }
+    currentAppData.teamData.tokens[tIdx].apps[meta.appName].features[meta.featureName][env] = val;
+
     if (this.state.change === false) {
       currentAppData.changeCount++;
     } else {
       currentAppData.changeCount--;
     }
+
     this.setState({
       active: !this.state.active,
       change: !this.state.change
@@ -218,13 +235,14 @@ var EnvironmentFlag = React.createClass({
     renderSaveButton();
   },
   render: function() {
+    var metaData = this.props.meta;
     var classes = "bootcards-summary-item";
     if (this.state.active) {
       classes += " active";
     }
     return (
       <div className="col-xs-6 col-sm-4">
-        <a className={classes} href="#" onClick={this.handleClick}>
+        <a className={classes} href="#" onClick={this.handleClick.bind(null, metaData, this.props.env)}>
           <i className="fa fa-3x fa-star"></i>
           <h4>{this.props.env}{this.state.change ? <span className="label label-danger">!</span> : ''}</h4>
         </a>
@@ -240,7 +258,7 @@ var AttributeList = React.createClass({
     var attribData = this.props.data;
     var flagAttributes = attribs.map(function (attrib) {
       return (
-        <AttributeFlag data={attribData[attrib]} attribName={attrib} />
+        <AttributeFlag key={attrib} data={attribData[attrib]} attribName={attrib} />
       )
     });
     return (
@@ -289,6 +307,25 @@ var AttributeFlag = React.createClass({
 });
 
 var SaveButton = React.createClass({
+  handleClick: function(){
+
+    $.ajax({
+      url: currentAppData.sourceUrl,
+      dataType: 'json',
+      type: 'PUT',
+      data: JSON.stringify(currentAppData.teamData),
+      success: function(data) {
+        resetData();
+        renderSaveButton();
+        run();
+      }.bind(this),
+        error: function(xhr, status, err) {
+
+          console.error(currentAppData.sourceUrl, status, err.toString());
+
+        }.bind(this)
+      });
+  },
   render: function() {
     var classes = "btn btn-default btn-lg btn-danger footer-btn";
     if (currentAppData.changeCount === 1 && currentAppData.saveButtonVisibile === false) {
@@ -300,11 +337,12 @@ var SaveButton = React.createClass({
       classes += " fade-out";
     }
     else if (currentAppData.changeCount == 0) {
+      currentAppData.saveButtonVisibile = false
       classes += " hidden";
     }
     return (
       <div className="footer">
-        <button type="button" className={classes}>
+        <button type="button" className={classes} onClick={this.handleClick}>
           <span className="glyphicon glyphicon-floppy-disk"></span> Save
         </button>
       </div>
@@ -317,16 +355,16 @@ var MainScreen = React.createClass({
   selectApp: function() {
     var sourceUrl;
 
-    if (!this.props.data.team) {
+    if (!currentAppData.team) {
       return <TeamList source="/svc/clip/teams" />;
     }
 
-    sourceUrl = "/svc/clip/team/" + this.props.data.team
-    if (!this.props.data.token) {
-      return <TokenList source={sourceUrl} />;
+    currentAppData.sourceUrl = "/svc/clip/team/" + currentAppData.team
+    if (!currentAppData.teamData) {
+      return <TokenList source={currentAppData.sourceUrl} />;
     }
 
-    return <ApplicationGroups source={sourceUrl} />;
+    return <ApplicationGroups source={currentAppData.sourceUrl} />;
   },
   render: function() {
     var app = this.selectApp();
@@ -341,15 +379,18 @@ var MainScreen = React.createClass({
 
 //var teamData = {"teams":[{"teamName":"IOS"},{"teamName":"MobileWeb"},{"teamName":"Data Universe"},{"teamName":"WebTech"},{"teamName":"Search"}]};
 
-var currentAppData = {
-  changeCount: 0,
-  saveButtonVisibile: false
-};
+var currentAppData = {};
+
+var resetData = function() {
+  currentAppData.changeCount = 0;
+  currentAppData.saveButtonVisibile = false;
+}
 
 var run = function() {
+  resetData();
   console.log(currentAppData);
   // Main APP
-  React.render(<MainScreen data={currentAppData} />, document.getElementById('content'));
+  React.render(<MainScreen />, document.getElementById('content'));
 }
 
 var renderSaveButton = function() {
