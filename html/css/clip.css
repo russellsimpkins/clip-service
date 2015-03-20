@@ -18,6 +18,7 @@ body {
 
 .bootcards-summary .panel-body > .row > div {
   padding: 2px;
+  cursor: pointer;
 }
 
 .bootcards-summary-item {
@@ -59,6 +60,20 @@ body {
   text-align: left;
 }
 
+.featureAttribute {
+  color: #aaa;
+}
+
+.featureAttribute:hover {
+  text-decoration: none;
+  color: #aaa;
+  cursor: pointer;
+}
+
 .enableAttr {
+  color: #333;
+}
+
+.enableAttr:hover {
   color: #333;
 }

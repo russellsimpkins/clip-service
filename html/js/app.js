@@ -23,7 +23,7 @@ var TeamList = React.createClass({
 
     var teamNodes = this.state.teamList.teams.map(function (team) {
       return (
-        <Team data={team.teamName} />
+        <Team data={team.teamName} key={team.teamName} />
       );
     });
     return (
@@ -139,7 +139,7 @@ var ApplicationGroups = React.createClass({
     var appList = appNames.map(function (appName) {
       return (
         <div className="col-sm-12">
-          <h3 className="row">Application: {appName}</h3>
+          <h3 className="col-sm-12 row">Application: {appName}</h3>
           <div className="row">
             <FeatureCardGroup data={appData[appName].features} />
           </div>
@@ -151,6 +151,7 @@ var ApplicationGroups = React.createClass({
     );
   }
 });
+
 
 var FeatureCardGroup = React.createClass({
 
@@ -170,9 +171,7 @@ var FeatureCardGroup = React.createClass({
 });
 
 
-
 var FeatureCard = React.createClass({
-
   render: function() {
     return (
       <div className="col-sm-4">
@@ -189,34 +188,14 @@ var FeatureCard = React.createClass({
               <EnvironmentFlag env="prd" data={this.props.data.prd}/>
             </div>
           </div>
-            <div className="panel-footer">
-            <FAttributeFlag data={this.props.data.attributes} />
-            
-          </div>
+          <AttributeList data={this.props.data.attributes} />
         </div>
       </div>
     );
   }
 });
 
-var FAttributeFlag = React.createClass({
-    getInitialState: function() {
-        return({})
-    },
-    render: function() {
-        var attributeNames = Object.keys(this.props.data);
-        var attribs = this.props.data;
-        console.log(attribs);
-        var attribList = attributeNames.map(function (pair) {
-            return (
-                <div><span className="enableAttr" ><input type="text" value={pair} /> <input type="text" value={attribs[pair]}/></span></div>
-            )
-        });
-        return(
-                <div>{attribList}</div>
-        );
-    }
-});
+
 var EnvironmentFlag = React.createClass({
   getInitialState: function() {
     return ({
@@ -224,8 +203,12 @@ var EnvironmentFlag = React.createClass({
         change: false
     })
   },
-
-    handleClick: function() {
+  handleClick: function() {
+    if (this.state.change === false) {
+      currentAppData.changeCount++;
+    } else {
+      currentAppData.changeCount--;
+    }
     this.setState({
       active: !this.state.active,
       change: !this.state.change
@@ -238,7 +221,7 @@ var EnvironmentFlag = React.createClass({
     }
     return (
       <div className="col-xs-6 col-sm-4">
-        <a className="bootcards-summary-item {this.state.active === true ? active : false}" href="#" onClick={this.handleClick}>
+        <a className={classes} href="#" onClick={this.handleClick}>
           <i className="fa fa-3x fa-star"></i>
           <h4>{this.props.env}{this.state.change ? <span className="label label-danger">!</span> : ''}</h4>
         </a>
@@ -247,66 +230,60 @@ var EnvironmentFlag = React.createClass({
   }
 });
 
-
-var MainScreen = React.createClass({
-
-  getInitialState: function() {
-    return { teamData: {} };
-  },
-
-  componentDidMount: function() {
-    $.get(this.props.source, function(result) {
-      var jsonData;
-      if (this.isMounted()) {
-        console.log(result);
-        jsonData = JSON.parse(result);
-        this.setState({
-          teamData: jsonData
-        });
-        if (!currentAppData.token) {
-          currentAppData.token = jsonData.tokens[0];
-        }
-      }
-    }.bind(this));
-  },
-
+var AttributeList = React.createClass({
 
   render: function() {
-    if ($.isEmptyObject(this.state.teamData)) {
-      return false;
-    }
-
-    var tokenNodes = this.state.teamData.tokens.map(function (token) {
+    var attribs = Object.keys(this.props.data);
+    var attribData = this.props.data;
+    var flagAttributes = attribs.map(function (attrib) {
       return (
-        <Token data={token} />
-      );
+        <AttributeFlag data={attribData[attrib]} attribName={attrib} />
+      )
     });
-
-    // var teamTokens = this.state.teamData.tokens.map(function (team) {
-    //   return (
-    //     <Token data={team} />
-    //   );
-    // });
     return (
-      <div className="row">
-      <div className="dropdown col-sm-12">
-        <button className="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
-          Choose Token
-          <span className="caret"></span>
-        </button>
-        <ul className="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-          {tokenNodes}
-        </ul>
-      </div>
+      <div className="panel-footer">
+        {flagAttributes}
       </div>
     );
   }
 });
 
+var AttributeFlag = React.createClass({
+  getInitialState: function() {
+    return ({
+        active: (this.props.data === 1),
+        change: false
+    })
+  },
+  handleClick: function() {
+    console.log('CLICK!');
+    if (this.state.change === false) {
+      currentAppData.changeCount++;
+    } else {
+      currentAppData.changeCount--;
+    }
+    this.setState({
+      active: !this.state.active,
+      change: !this.state.change
+    });
+  },
+  render: function() {
+    var classes = "featureAttribute";
+    var iconClasses = "fa";
+    if (this.state.active) {
+      classes += " enableAttr";
+      iconClasses += " fa-check-circle";
+    } else {
+      iconClasses += " fa-circle-o";
+    }
+    return (
+      <a className={classes} onClick={this.handleClick}><i className={iconClasses}></i> FrontEndEnabled</a>
+    );
+  }
+});
 
-//"{\"name\":\"Test\",\"users\":null,\"tokens\":[{\"team\":\"Test\",\"crc32\":1949307765,\"token\":\"3b374f7cea1e21b8fa4edb8950e0c7f6de078282fd85314f3a4d4294a62c92fe\",\"apps\":{\"doughnuts\":{\"features\":{\"chocolate\":{\"attributes\":{\"displayFE\":1},\"sbx\":1,\"dev\":1,\"stg\":0,\"int\":0,\"prd\":0}}}}}]}"
 
-var HeadMainScreen = React.createClass({
+var MainScreen = React.createClass({
 
   selectApp: function() {
     var sourceUrl;
@@ -335,12 +312,14 @@ var HeadMainScreen = React.createClass({
 
 //var teamData = {"teams":[{"teamName":"IOS"},{"teamName":"MobileWeb"},{"teamName":"Data Universe"},{"teamName":"WebTech"},{"teamName":"Search"}]};
 
-var currentAppData = {};
+var currentAppData = {
+  changeCount: 0
+};
 
 var run = function() {
   console.log(currentAppData);
   // Main APP
-  React.render(<HeadMainScreen data={currentAppData} />, document.getElementById('content'));
+  React.render(<MainScreen data={currentAppData} />, document.getElementById('content'));
 }
 
 run();
