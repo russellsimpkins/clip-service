@@ -277,7 +277,10 @@ var AttributeFlag = React.createClass({
       iconClasses += " fa-circle-o";
     }
     return (
-      <a className={classes} onClick={this.handleClick}><i className={iconClasses}></i> FrontEndEnabled</a>
+      <span>
+        <a className={classes} onClick={this.handleClick}><i className={iconClasses}></i> FrontEndEnabled</a>
+        {this.state.change ? <span className="label label-danger">!</span> : ''}
+      </span>
     );
   }
 });
