@@ -1,0 +1,72 @@
+#!/bin/bash
+set -e
+printHelp() {
+    echo "usage: ${0} <name> <build-number> <workspace>"
+    exit 1
+}
+
+
+if [[ "${1}" == "" || "${2}" == "" || "${3}" == "" ]]; then
+    printHelp
+fi
+   
+name="${1}"
+buildnumber="${2}"
+buildroot="${3}"
+
+if [ "${4}" != "" ]; then
+    specfile="${buildroot}/${4}"
+else
+    specfile="${buildroot}/rpm.spec"
+fi
+
+if [ ! -d "${buildroot}" ]; then 
+   echo "<workspace> should be the directory that has your source and your rpm.spec file"
+   printHelp
+fi
+
+if [ ! -f "${specfile}" ]; then 
+   echo "Missing specfile: ${specfile}"
+   printHelp
+fi
+
+if [ -d ${buildroot}/rpmbuild ]; then
+    rm -rf ${buildroot}/rpmbuild
+fi
+
+mkdir ${buildroot}/rpmbuild
+version=1.0.0
+if [ -f version.txt ]; then
+    for e in $(cat version.txt); do
+        if [ "x" != "${e}x" ]; then
+            version=$e
+        fi
+    done
+fi
+
+for e in RPMS BUILD BUILDROOT; do
+    rm -rf ${buildroot}/rpmbuild/$e
+    mkdir ${buildroot}/rpmbuild/$e
+done
+
+
+rsync -a --exclude=.git --exclude=rpmbuild ${buildroot}/ ${buildroot}/rpmbuild/BUILD/${name} 2>&1 >/dev/null
+
+rpmbuild --verbose \
+    --define "_sourcedir ${buildroot}/rpmbuild/BUILD/${name}" \
+    --define "_topdir ${buildroot}/rpmbuild" \
+    --define "_build_number ${buildnumber}" \
+    --define "_name ${name}" \
+    --define "_version ${version}" \
+    --define "_commit ${GIT_COMMIT}" \
+    -vvv -bb "${specfile}" > ${buildroot}/rpmbuild/build.log
+
+rpm=$(find ${buildroot}/rpmbuild -name ${name}*.rpm)
+rpmfile=$(echo ${rpm}|sed 's|.*/||')
+
+echo "BUILD=${buildnumber}" > ${WORKSPACE}/version.properties
+echo "VERSION=${version}-${BUILD_NUMBER}" >> ${WORKSPACE}/version.properties
+echo "RPM=$rpmfile" >> ${WORKSPACE}/version.properties
+echo $rpm
+exit 0
+
