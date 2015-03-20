@@ -28,11 +28,10 @@ TODO:
 
 ### Backend TODO
 
-- Package clip as an RPM
-- Package ensemble as an RPM
-- Create a puppet file for Nginx
-- Configure Redis to listen on those off ports usually used by graphite
-- Start 2 instances for master slave
+~~- Package clip as an RPM~~
+~~- Package ensemble as an RPM~~
+~~- Create a puppet file for Nginx~~
+
 - Show working example
   - Create a service call for 7 day weather forcast with Ensemble
   - Pick something as a feature to show usage
