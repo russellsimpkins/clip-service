@@ -278,7 +278,7 @@ var AttributeList = React.createClass({
 var AttributeFlag = React.createClass({
   getInitialState: function() {
     return ({
-        active: (this.props.data === 1),
+        active: (this.props.data === true),
         change: false
     })
   },
@@ -288,13 +288,13 @@ var AttributeFlag = React.createClass({
 
     // Change the data in the main object for saving later
     var tIdx = currentAppData.tokenIndex;
-    var val = currentAppData.teamData.tokens[tIdx].apps[meta.appName].features[meta.featureName].attributes[attrib];
+    var val = currentAppData.teamData.tokens[tIdx].apps[meta.appName].features[meta.featureName]["attributes"][attrib];
     if (val == true) {
       val = false;
     } else {
       val = true;
     }
-    currentAppData.teamData.tokens[tIdx].apps[meta.appName].features[meta.featureName].attributes[attrib] = val;
+    currentAppData.teamData.tokens[tIdx].apps[meta.appName].features[meta.featureName]["attributes"][attrib] = val;
 
 
     if (this.state.change === false) {
