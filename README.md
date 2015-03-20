@@ -12,7 +12,6 @@ TODO:
 - Show a usage example where we turn features on and off using real data
 
 ### Frontend TODO
--- CLiP Frotend features
 - Update the data of the current feature
   - set flags
   - edit attributes
@@ -29,16 +28,14 @@ TODO:
 
 ### Backend TODO
 
-Package clip as an RPM
-Package ensemble as an RPM
-
-Create a puppet file for Nginx
-Configure Redis to listen on those off ports usually used by graphite
-
-Start 2 instances for master slave
-
-Create a service call for 7 day weather forcast with Ensemble
-Pick something as a feature to show usage
-Copy the HTML from webtech to use to display the HTML feature
+- Package clip as an RPM
+- Package ensemble as an RPM
+- Create a puppet file for Nginx
+- Configure Redis to listen on those off ports usually used by graphite
+- Start 2 instances for master slave
+- Show working example
+  - Create a service call for 7 day weather forcast with Ensemble
+  - Pick something as a feature to show usage
+  - Copy the HTML from webtech to use to display the HTML feature
 
 
