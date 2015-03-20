@@ -13,13 +13,14 @@ $( document ).ready(function() {
 function getFeatures() {
     console.log("***** Getting features");
     jQuery.ajax({
-        url: '/svc/clip/team/Test/token/26545601bb712aa236302fa6e5adff8ef29b22c50e975d8887af68e0394ab51f/MobileWeb',
+        url: '/svc/clip/team/Test/token/132050dbf258529724f0c1a711c666f76c5a72d53bf83329fe65728bb679cad1/MobileWeb',
         accepts: 'application/x-json',
         cache: false,
         crossDomain: true,
         dataType: 'json',
         type: 'GET',
         success: function(res) {
+            console.log(res)
             if (res.features.useAmazonDirectMatch.dev) {
                 console.log("SHOWING THIS");
                 //$("#wFinder").toggleClass("hidden");
