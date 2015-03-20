@@ -28,9 +28,9 @@ TODO:
 
 ### Backend TODO
 
-~~- Package clip as an RPM~~
-~~- Package ensemble as an RPM~~
-~~- Create a puppet file for Nginx~~
+- ~~Package clip as an RPM~~
+- ~~Package ensemble as an RPM~~
+- ~~Create a puppet file for Nginx~~
 
 - Show working example
   - Create a service call for 7 day weather forcast with Ensemble
