@@ -134,6 +134,7 @@ var ApplicationGroups = React.createClass({
       return false;
     }
 
+    var refresh = this.props.refresh || false;
     var appNames = Object.keys(this.state.apps);
     var appData = this.state.apps;
     var appList = appNames.map(function (appName) {
@@ -141,7 +142,7 @@ var ApplicationGroups = React.createClass({
         <div className="col-sm-12" key={appName}>
           <h3 className="col-sm-12 row">Application: {appName}</h3>
           <div className="row">
-            <FeatureCardGroup data={appData[appName].features} meta={appName}/>
+            <FeatureCardGroup refresh={refresh} data={appData[appName].features} meta={appName}/>
           </div>
         </div>
       );
@@ -158,12 +159,13 @@ var ApplicationGroups = React.createClass({
 var FeatureCardGroup = React.createClass({
 
   render: function() {
+    var refresh = this.props.refresh || false;
     var meta = this.props.meta;
     var featureNames = Object.keys(this.props.data);
     var featureData = this.props.data;
     var featureList = featureNames.map(function (feature) {
       return (
-        <FeatureCard data={featureData[feature]} featureName={feature} key={feature} meta={meta} />
+        <FeatureCard refresh={refresh} data={featureData[feature]} featureName={feature} key={feature} meta={meta} />
       )
     });
     return (
@@ -177,7 +179,8 @@ var FeatureCard = React.createClass({
   render: function() {
     var metaData = {
       appName: this.props.meta,
-      featureName: this.props.featureName
+      featureName: this.props.featureName,
+      refresh: this.props.refresh
     };
     return (
       <div className="col-sm-4">
@@ -236,15 +239,22 @@ var EnvironmentFlag = React.createClass({
   },
   render: function() {
     var metaData = this.props.meta;
+    if (metaData.refresh) {
+      this.state.change = false;
+    }
     var classes = "bootcards-summary-item";
+    var labelClass = "label label-danger";
     if (this.state.active) {
       classes += " active";
+    }
+    if (!this.state.change) {
+      labelClass += " hidden";
     }
     return (
       <div className="col-xs-6 col-sm-4">
         <a className={classes} href="#" onClick={this.handleClick.bind(null, metaData, this.props.env)}>
           <i className="fa fa-3x fa-star"></i>
-          <h4>{this.props.env}{this.state.change ? <span className="label label-danger">!</span> : ''}</h4>
+          <h4>{this.props.env}{this.state.change ? <span className={labelClass}>!</span> : ''}</h4>
         </a>
       </div>
     );
@@ -315,9 +325,8 @@ var SaveButton = React.createClass({
       type: 'PUT',
       data: JSON.stringify(currentAppData.teamData),
       success: function(data) {
-        resetData();
+        run(true);
         renderSaveButton();
-        run();
       }.bind(this),
         error: function(xhr, status, err) {
 
@@ -364,7 +373,7 @@ var MainScreen = React.createClass({
       return <TokenList source={currentAppData.sourceUrl} />;
     }
 
-    return <ApplicationGroups source={currentAppData.sourceUrl} />;
+    return <ApplicationGroups refresh={this.props.refresh} source={currentAppData.sourceUrl} />;
   },
   render: function() {
     var app = this.selectApp();
@@ -386,11 +395,11 @@ var resetData = function() {
   currentAppData.saveButtonVisibile = false;
 }
 
-var run = function() {
+var run = function(forceRefresh) {
   resetData();
   console.log(currentAppData);
   // Main APP
-  React.render(<MainScreen />, document.getElementById('content'));
+  React.render(<MainScreen refresh={forceRefresh} />, document.getElementById('content'));
 }
 
 var renderSaveButton = function() {
