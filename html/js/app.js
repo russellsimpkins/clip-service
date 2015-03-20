@@ -1,5 +1,17 @@
 "use strict";
 
+var getQueryVariable = function(variable) {
+  var query = window.location.search.substring(1);
+  var vars = query.split("&");
+  for (var i=0;i<vars.length;i++) {
+    var pair = vars[i].split("=");
+    if(pair[0] == variable){
+      return pair[1];
+    }
+  }
+  return(false);
+};
+
 var TeamList = React.createClass({
 
   getInitialState: function() {
@@ -17,6 +29,9 @@ var TeamList = React.createClass({
   },
 
   render: function() {
+    $('#teamNav').addClass('active');
+    $('#tokenNav').removeClass('active');
+    $('#appNav').removeClass('active');
     if ($.isEmptyObject(this.state.teamList)) {
       return false;
     }
@@ -73,6 +88,9 @@ var TokenList = React.createClass({
   },
 
   render: function() {
+    $('#teamNav').removeClass('active');
+    $('#tokenNav').addClass('active');
+    $('#appNav').removeClass('active');
     if ($.isEmptyObject(this.state.teamData)) {
       return false;
     }
@@ -130,6 +148,9 @@ var ApplicationGroups = React.createClass({
   },
 
   render: function() {
+    $('#teamNav').removeClass('active');
+    $('#tokenNav').removeClass('active');
+    $('#appNav').addClass('active');
     if ($.isEmptyObject(this.state.apps)) {
       return false;
     }
@@ -169,7 +190,10 @@ var FeatureCardGroup = React.createClass({
       )
     });
     return (
-      <div>{featureList}</div>
+      <div>
+        {featureList}
+        <NewFeatureButton />
+      </div>
     );
   }
 });
@@ -331,6 +355,37 @@ var AttributeFlag = React.createClass({
   }
 });
 
+var NewFeatureButton = React.createClass({
+  handleClick: function(){
+
+    $.ajax({
+      url: currentAppData.sourceUrl,
+      dataType: 'json',
+      type: 'PUT',
+      data: JSON.stringify(currentAppData.teamData),
+      success: function(data) {
+        run(true);
+        renderSaveButton();
+      }.bind(this),
+        error: function(xhr, status, err) {
+
+          console.error(currentAppData.sourceUrl, status, err.toString());
+
+        }.bind(this)
+      });
+  },
+  render: function() {
+    var classes = "btn btn-default btn-lg footer-btn";
+    return (
+      <div className="row">
+        <button type="button" className={classes} >
+          <span className="glyphicon glyphicon-plus"></span> Add A Feature Flag
+        </button>
+      </div>
+    );
+  }
+});
+
 var SaveButton = React.createClass({
   handleClick: function(){
 
@@ -408,6 +463,8 @@ var currentAppData = {};
 var resetData = function() {
   currentAppData.changeCount = 0;
   currentAppData.saveButtonVisibile = false;
+  console.log(getQueryVariable('team'));
+  currentAppData.team = currentAppData.team || getQueryVariable('team') || '';
 }
 
 var run = function(forceRefresh) {
