@@ -147,7 +147,9 @@ var ApplicationGroups = React.createClass({
       );
     });
     return (
-      <div>{appList}</div>
+      <div>
+        {appList}
+      </div>
     );
   }
 });
@@ -213,6 +215,7 @@ var EnvironmentFlag = React.createClass({
       active: !this.state.active,
       change: !this.state.change
     });
+    renderSaveButton();
   },
   render: function() {
     var classes = "bootcards-summary-item";
@@ -256,7 +259,6 @@ var AttributeFlag = React.createClass({
     })
   },
   handleClick: function() {
-    console.log('CLICK!');
     if (this.state.change === false) {
       currentAppData.changeCount++;
     } else {
@@ -266,6 +268,7 @@ var AttributeFlag = React.createClass({
       active: !this.state.active,
       change: !this.state.change
     });
+    renderSaveButton();
   },
   render: function() {
     var classes = "featureAttribute";
@@ -285,6 +288,29 @@ var AttributeFlag = React.createClass({
   }
 });
 
+var SaveButton = React.createClass({
+  render: function() {
+    var classes = "btn btn-default btn-lg btn-danger footer-btn";
+    if (currentAppData.changeCount === 1 && currentAppData.saveButtonVisibile === false) {
+      currentAppData.saveButtonVisibile = true;
+      classes += " fade-in";
+    }
+    else if (currentAppData.changeCount === 0 && currentAppData.saveButtonVisibile === true) {
+      currentAppData.saveButtonVisibile = false;
+      classes += " fade-out";
+    }
+    else if (currentAppData.changeCount == 0) {
+      classes += " hidden";
+    }
+    return (
+      <div className="footer">
+        <button type="button" className={classes}>
+          <span className="glyphicon glyphicon-floppy-disk"></span> Save
+        </button>
+      </div>
+    );
+  }
+});
 
 var MainScreen = React.createClass({
 
@@ -316,13 +342,18 @@ var MainScreen = React.createClass({
 //var teamData = {"teams":[{"teamName":"IOS"},{"teamName":"MobileWeb"},{"teamName":"Data Universe"},{"teamName":"WebTech"},{"teamName":"Search"}]};
 
 var currentAppData = {
-  changeCount: 0
+  changeCount: 0,
+  saveButtonVisibile: false
 };
 
 var run = function() {
   console.log(currentAppData);
   // Main APP
   React.render(<MainScreen data={currentAppData} />, document.getElementById('content'));
+}
+
+var renderSaveButton = function() {
+  React.render(<SaveButton />, document.getElementById('footer'));
 }
 
 run();
