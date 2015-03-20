@@ -1,0 +1,252 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0062)http://www.nytimes.com/js/section/travel/eta_enu1033/calx.html -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+
+<style type="text/css">
+body {color: black; background-color: white; margin:0; padding:0;}
+* {margin:0;padding:0;font-family:arial,sans-serif;}
+.pointer {cursor:pointer;cursor:hand;}
+#CalContainer {position:absolute; top:0; left:0; height:210px; background-color:white;border:1px solid #ccc;padding-left:5px;padding-top:4px;}
+#NavBar td#PrevBtn,
+#NavBar td#NextBtn {overflow:hidden; height:20px;}
+#NavBar td#PrevBtn {padding-left:3px;}
+#NavBar td#NextBtn {padding-left: 3px;}
+#NavBar #PImg {cursor:pointer; cursor:hand;}
+#NavBar #TitleBar {
+width:112px;
+color:black;
+text-align:center;
+text-transform:uppercase;
+font-size:11px;
+font-weight:bold;
+}
+#NavBar #NImg {cursor:pointer; cursor:hand;}
+#Cal {position:relative; top:0px; left:2px; }
+#Cal #Weekdays { height:20px;background-color:#F0F4F5;margin-right:8px;margin-top:4px;width:147px;margin-bottom:6px;}
+#Cal #Dates {_height: 1%;clear:both;padding-bottom:7px;overflow:auto;_overflow:none;}
+#Cal #Dates div,
+#Cal #Weekdays div {
+width: 16px;
+height:17px;
+float: left;
+text-align: center;
+line-height: 17px;
+color: #004276;
+font-size: 10px;
+margin-left:2px;
+margin-right:2px;
+margin-top:2px;
+vertical-align:middle;
+padding-bottom:1px;
+font-size:10px;
+}
+#Cal #Weekdays div {color: #666; font-size: 11px; font-weight:bold;_width:15px;_margin-right:3px;}
+#Cal #Weekdays div.sunday{_margin-right:3px;}
+#Cal #Weekdays div.saturday{_margin-left:0px;}
+#Cal #Dates div.picked {
+width: 14px;
+height: 15px;
+border:1px solid #004276;
+line-height: 15px;
+}
+#Cal #Dates div#d01 {_margin-left:3px;}
+.flo {float:left;}
+.today {color:#999 !important;}
+.invalid {cursor:default;}
+#BotNav {margin-left: 3px; margin-right: 8px; border-top:1px solid #ccc;clear:both;}
+#BotNav #Close {text-align:center;padding-top:9px;}
+#BotNav #Close a{text-decoration:none;color:#004276;display:block;font-size:11px;}
+</style>
+</head>
+<body onload="DoLoad()" marginwidth="0" marginheight="0">
+<div id="CalContainer">
+<div id="NavBar">
+<table cellpadding="0" cellspacing="0">
+<tbody><tr>
+<td id="PrevBtn"><!--LOC Comment: alt text --><img id="PImg" src="arrow_left.jpg" alt="Previous Month" title="" onclick="MthClk(this)"></td>
+<td id="TitleBar"></td>
+<td id="NextBtn"><!--LOC Comment: alt text --><img id="NImg" src="arrow_right.jpg" alt="Next Month" title="" onclick="MthClk(this)"></td>
+</tr>
+</tbody></table>
+</div>
+<div id="Cal">
+<div id="Weekdays">
+<div class="sunday">S</div><div class="monday">M</div><div class="tuesday">T</div><div>W</div><div>T</div><div class="friday">F</div><div class="saturday">S</div>
+</div>
+<div id="Dates" style="width: 140px;">
+<div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div><div>&nbsp;</div>
+<div id="d01">1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div>
+<div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div>
+<div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div>
+<div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div id="d28">28</div>
+<div id="d29">29</div><div id="d30">30</div><div id="d31">31</div>
+</div>
+</div>
+<div id="BotNav">
+<div id="Close"><a href="javascript:CloseCal()">Close</a></div>
+</div>
+</div>
+<script type="text/javascript">
+function getObj(objID)
+{
+	if(document.getElementById){return document.getElementById(objID);}
+	else if(document.all){return document.all[objID];}
+	else if(document.layers){return document.layers[objID];}
+}
+function EvtObj(e){if(!e)e=window.event;return e;}
+function stopBubble(e){e.cancelBubble=true;if(e.stopPropagation)e.stopPropagation();}
+function EvtTgt(e)
+{
+	var el;
+	if(e.target)el=e.target;
+	else if(e.srcElement)el=e.srcElement;
+	if(el.nodeType==3)el=el.parentNode; // defeat Safari bug
+	return el;
+}
+var fMac=navigator.userAgent.indexOf("Mac")>=0;
+if (fMac){ getObj("Dates").style.width="140px"; } // MacIE bug
+
+var wp=window.parent;
+var cf=null;
+var g_fCL=false;
+
+var g_eInp=0;
+var g_mC,g_yC;
+var g_dtMin,g_dtMax;
+var g_rgDiv=getObj('Dates').getElementsByTagName("div");
+var g_dtPick;
+function GetCF(){if (!cf)cf=wp.getObj('CalFrame');return cf;}
+function DoLoad()
+{
+	g_fCL=true;
+}
+
+function DoCal(eD,eDP,dmin,dmax)
+{
+	var dt=wp.GetInputDate(eD.value);
+	if(null==dt&&null!=eDP){dt=wp.GetInputDate(eDP.value);}
+	g_dtPick=dt;
+	if(dmin&&""==dmin)dmin=null;
+	if(dmax&&""==dmax)dmax=null;
+	if(null==dt)
+	{
+		// Check for valid min date and use that, else use current
+		dt=new Date();
+		if(dmin&&dt<new Date(dmin))dt=new Date(dmin);
+	}
+
+	WeekLoad();
+	SetMinMax(dmin?new Date(dmin):null,dmax?new Date(dmax):null);
+
+	UpdCal(dt.getMonth(),dt.getFullYear());
+
+	g_eInp=eD;
+
+	// prevent Mozilla from flickering
+	setTimeout("ShowCal()",1);
+}
+
+function ShowCal()
+{
+	if ("none"==GetCF().style.display) {GetCF().style.display="block";}// FF drawing bug
+	GetCF().style.visibility="visible";
+}
+
+function MthClk(e){UpdCal(parseInt(e.getAttribute("month")),parseInt(e.getAttribute("year")));}
+function DtClk(e)
+{
+	e=EvtObj(e);
+	EvtTgt(e).style.backgroundColor="";
+	wp.CalDateSet(g_eInp,parseInt(EvtTgt(e).innerHTML),g_mC+1,g_yC)
+	GetCF().style.visibility="hidden";
+	wp.SetCalShown(false);
+	stopBubble(e);
+	wp.CalendarCallback();
+}
+
+function UpdCal(m,y)
+{
+	g_mC=m;g_yC=y;
+	SetTitle(m,y);
+	var c=wp.GetMonthCount(m,y);
+	var mty=DOW(1,m,y);
+	for (var i=0;i<g_rgDiv.length;i++)
+	{
+		if (i>5)
+		{
+			if (i>33)getObj("d"+(i-5)).style.display=(c>i-6?"block":"none");
+			var d = new Date(g_yC,g_mC,i-5);
+			SetClk(g_rgDiv[i],((!g_dtMin||d>=g_dtMin)&&(!g_dtMax||d<=g_dtMax)));
+		}
+		else
+		{
+			if (mty>0)
+			{
+				g_rgDiv[i].style.display="inline";
+				mty--;
+			}
+			else g_rgDiv[i].style.display="none";
+		}
+	}
+	UpdNext(m,y);
+	UpdPrev(m,y);
+
+	if (g_dtPick&&g_yC==g_dtPick.getFullYear()&&g_mC==g_dtPick.getMonth()) g_rgDiv[g_dtPick.getDate()+5].className+=" picked";
+	var t=new Date();
+	if (g_yC==t.getFullYear()&&g_mC==t.getMonth()) g_rgDiv[t.getDate()+5].className+=" today";
+	if (!fMac) g_rgDiv[0].className+=" flo"; // MSIE5.0 bug
+}
+function SetArr(e,m,y,v)
+{
+	var el=getObj(e);
+	el.setAttribute("month",m);
+	el.setAttribute("year",y);
+	el.style.visibility=v?"visible":"hidden";
+}
+function UpdNext(m,y)
+{
+	var nm=(m+1)%12; var ny=y+(m==11?1:0);
+	var hd=(!g_dtMax||!(ny>g_dtMax.getFullYear()||(ny==g_dtMax.getFullYear()&&parseInt(nm)>g_dtMax.getMonth())));
+	if(hd) {SetArr('NImg',nm,ny,hd); } else {getObj('NImg').style.visibility="hidden"; }
+}
+
+function UpdPrev(m,y)
+{
+	var pm=(m+11)%12; var py=y-(m==0?1:0);
+	var hd=(!g_dtMin||!(py<g_dtMin.getFullYear()||(py==g_dtMin.getFullYear()&&parseInt(pm)<g_dtMin.getMonth())));
+	if(hd) {SetArr('PImg',pm,py,hd); } else {getObj('PImg').style.visibility="hidden"; }
+}
+function DtHvr(e)
+{
+	e=EvtObj(e);
+	var aDiv = EvtTgt(e);
+	if (!g_dtPick||g_yC!=g_dtPick.getFullYear()||g_mC!=g_dtPick.getMonth()||aDiv!=g_rgDiv[g_dtPick.getDate()+5]) aDiv.style.backgroundColor="#FFFFFF";
+}
+function DtExt(e)
+{
+	e=EvtObj(e);
+	var aDiv = EvtTgt(e);
+	if (!g_dtPick||g_yC!=g_dtPick.getFullYear()||g_mC!=g_dtPick.getMonth()||aDiv!=g_rgDiv[g_dtPick.getDate()+5]) aDiv.style.backgroundColor="";
+}
+function SetClk(d,f)
+{
+	d.className =(f?"pointer":"invalid");
+	d.onclick=f?DtClk:null;
+	d.onmouseover=f?DtHvr:null;
+	d.onmouseout=f?DtExt:null;
+}
+function CloseCal(){wp.CalSetFocus(g_eInp);GetCF().style.visibility="hidden";wp.SetCalShown(false);}
+function SetMinMax(n,x){g_dtMin=n;g_dtMax=x;}
+function FmtTitle(s){var r=s.charAt(0);for(var i=1;i<s.length;i++) r=r+s.charAt(i);return r;}
+function SetTitle(m,y){var szTitle=FmtTitle(rN[m])+"&nbsp;"+FmtTitle(y.toString());getObj('TitleBar').innerHTML=szTitle;}
+// LOC Comment: path for week gif
+function WeekLoad(){ /*var n="../images/week0.gif";getObj('WImg').src=n;*/}
+// LOC Comment: Month abbr.
+var rN=new Array(12);rN[0]="January";rN[1]="February";rN[2]="March";rN[3]="April";rN[4]="May";rN[5]="June";rN[6]="July";rN[7]="August";rN[8]="September";rN[9]="October";rN[10]="November";rN[11]="December";
+function DOW(d,m,y){var dt=new Date(y,m,d);return(dt.getDay()+(7-wp.GetDowStart()))%7;}
+</script>
+
+
+
+
+</body></html>

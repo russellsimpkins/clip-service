@@ -1,0 +1,18 @@
+
+var ftGUID_1064157="2635EC5DCEA0EC";
+var ftConfID_1064157="0";
+var ftParams_1064157="ftx=&fty=&ftadz=&ftscw=&ft_custom=&ftOBA=1&ft_referrer=http%3A%2F%2Fwww.nytimes.com%2Fgst%2Fweather.html&cachebuster=814789.0414111316";
+var ftKeyword_1064157="";
+var ftCustom_1064157="";
+var ftSection_1064157="";
+var ftSegment_1064157="";
+var ftSegmentList_1064157=[];
+var ftRuleMatch_1064157="0";
+var ftTimestamp_1064157="1426850026";
+var ftImp1064157 = {};
+ftImp1064157.privacy = "x";
+ftImp1064157.guidAge = "-1";
+
+
+document.write('<scr'+'ipt src="http://cdn.flashtalking.com/xre/106/1064157/830778/js/j-1064157-830778.js" id="ftscript_m1064157" name="ftscript_m1064157"></scr'+'ipt>');
+                    
