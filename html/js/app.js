@@ -187,21 +187,7 @@ var ApplicationTitle = React.createClass({
       currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[app] = appd;
       console.log("saving " + app);
       currentAppData.editApp = "";
-      $.ajax({
-      url: currentAppData.sourceUrl,
-      dataType: 'json',
-      type: 'PUT',
-      data: JSON.stringify(currentAppData.teamData),
-      success: function(data) {
-        run(true);
-        renderSaveButton();
-      }.bind(this),
-        error: function(xhr, status, err) {
-
-          console.error(currentAppData.sourceUrl, status, err.toString());
-
-        }.bind(this)
-      });
+      saveAppState();
     } else {
       currentAppData.editApp = app;
     }
@@ -219,6 +205,48 @@ var ApplicationTitle = React.createClass({
         <div>{edit ? <span><input type="text" value={value} onChange={this.handleChange} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, 1)} /></span> : <span className="edit" onClick={this.handleClick.bind(null, this.props.appName, 0)}>{this.props.appName}</span>}</div>
     );
   }
+});
+
+
+var FeatureTitle = React.createClass({
+  getInitialState: function() {
+    return {value: this.props.featureName};
+  },
+  handleClick: function(feature, appName, saveit) {
+    if (saveit === 1) {
+      var app = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[appName];
+      var appd = app.features[currentAppData.editFeature];
+      var keys = Object.keys(app.features);
+      var idx  = keys.indexOf(currentAppData.editFeature);
+      keys[idx] = feature;
+      var allFeatures = app.features;
+      allFeatures[feature] = appd;
+      delete app.features;
+      app.features = {};
+      for (var i=0;i<keys.length;++i) {
+        app.features[keys[i]] = allFeatures[keys[i]];
+      }
+      currentAppData.editFeature = "";
+      
+      //saveAppState();
+    } else {
+      currentAppData.editFeature = feature;
+    }
+    run();
+  },
+  handleChange: function(event) {
+    this.setState({value: event.target.value});
+    console.log(event.target.value);
+    
+  },
+  render: function() {
+    var value = this.state.value;
+    var edit = ( undefined != currentAppData.editFeature && currentAppData.editFeature == this.props.featureName) ? true : false;
+    return (
+        <div>{edit ? <span><input type="text" value={value} onChange={this.handleChange} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, this.props.appName, 1)} /></span> : <span className="edit" onClick={this.handleClick.bind(null, this.props.featureName, this.props.appName, 0)}>{this.props.featureName}</span>}</div>
+    );
+    }
+  
 });
 
 var FeatureCardGroup = React.createClass({
@@ -254,7 +282,7 @@ var FeatureCard = React.createClass({
       <div className="col-sm-4">
         <div className="panel panel-default bootcards-summary">
           <div className="panel-heading">
-            <h3 className="panel-title">{this.props.featureName}</h3>
+        <h3 className="panel-title"><FeatureTitle featureName={metaData.featureName} appName={metaData.appName} /></h3>
           </div>
           <div className="panel-body">
             <div className="row">
@@ -425,22 +453,7 @@ var NewFeatureButton = React.createClass({
 
 var SaveButton = React.createClass({
   handleClick: function(){
-
-    $.ajax({
-      url: currentAppData.sourceUrl,
-      dataType: 'json',
-      type: 'PUT',
-      data: JSON.stringify(currentAppData.teamData),
-      success: function(data) {
-        run(true);
-        renderSaveButton();
-      }.bind(this),
-        error: function(xhr, status, err) {
-
-          console.error(currentAppData.sourceUrl, status, err.toString());
-
-        }.bind(this)
-      });
+    saveAppState();
   },
   render: function() {
     var classes = "btn btn-default btn-lg btn-danger footer-btn";
@@ -510,7 +523,23 @@ var run = function(forceRefresh) {
   // Main APP
   React.render(<MainScreen refresh={forceRefresh} />, document.getElementById('content'));
 }
+var saveAppState = function() {
+  $.ajax({
+      url: currentAppData.sourceUrl,
+      dataType: 'json',
+      type: 'PUT',
+      data: JSON.stringify(currentAppData.teamData),
+      success: function(data) {
+        run(true);
+        renderSaveButton();
+      }.bind(this),
+        error: function(xhr, status, err) {
 
+          console.error(currentAppData.sourceUrl, status, err.toString());
+
+        }.bind(this)
+  });
+}
 var renderSaveButton = function() {
   React.render(<SaveButton />, document.getElementById('footer'));
 }
