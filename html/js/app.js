@@ -152,7 +152,7 @@ var ApplicationGroups = React.createClass({
     
     return (
         <div className="col-sm-12" key={appName}>
-        <h3 className="col-sm-12 row">Application: <ApplicationTitle appName={appName} /></h3>
+        <h3 className="col-sm-12 row">Application: <ApplicationTitle appName={appName} /></h3><NewAppButton />
           <div className="row">
             <FeatureCardGroup refresh={refresh} data={appData[appName].features} meta={appName}/>
           </div>
@@ -458,6 +458,32 @@ var NewFeatureButton = React.createClass({
       <div className="row">
         <button type="button" className={classes} onClick={this.handleClick.bind(null, metaData, this.props.attribName)}>
           <span className="glyphicon glyphicon-plus"></span> Add A Feature Flag
+        </button>
+      </div>
+    );
+  }
+});
+
+var NewAppButton = React.createClass({
+  handleClick: function(){
+    var feat = {"attributes":{},"sbx":0,"dev":0,"stg":0,"int":0,"prd":0};
+      
+    var d = new Date();
+    var feats = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps["New APP " + d.getTime()] = {};
+    feats.features = {};
+    feats["untitled " + d.getTime()]= feat;
+    currentAppData.changeCount = 1;
+    renderSaveButton();
+    run();
+  },
+  render: function() {
+      var classes = "btn btn-default btn-lg footer-btn";
+      var metaData = this.props.meta;
+
+    return (
+      <div className="row">
+        <button type="button" className={classes} onClick={this.handleClick.bind(null, metaData, this.props.attribName)}>
+          <span className="glyphicon glyphicon-plus"></span> Add Application
         </button>
       </div>
     );
