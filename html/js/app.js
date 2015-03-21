@@ -146,22 +146,22 @@ var ApplicationGroups = React.createClass({
       // }.bind(this));
     }
   },
-
+  
   render: function() {
     $('#teamNav').removeClass('active');
     $('#tokenNav').removeClass('active');
     $('#appNav').addClass('active');
     if ($.isEmptyObject(this.state.apps)) {
       return false;
-    }
-
+    }    
     var refresh = this.props.refresh || false;
     var appNames = Object.keys(this.state.apps);
     var appData = this.state.apps;
     var appList = appNames.map(function (appName) {
-      return (
+    
+    return (
         <div className="col-sm-12" key={appName}>
-          <h3 className="col-sm-12 row">Application: {appName}</h3>
+        <h3 className="col-sm-12 row">Application: <ApplicationTitle appName={appName} /></h3>
           <div className="row">
             <FeatureCardGroup refresh={refresh} data={appData[appName].features} meta={appName}/>
           </div>
@@ -176,15 +176,59 @@ var ApplicationGroups = React.createClass({
   }
 });
 
+var ApplicationTitle = React.createClass({
+  getInitialState: function() {
+    return {value: this.props.appName};
+  },
+  handleClick: function(app, saveit) {
+    if (saveit === 1) {
+      var appd = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[currentAppData.editApp];
+      delete currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[currentAppData.editApp];
+      currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[app] = appd;
+      console.log("saving " + app);
+      currentAppData.editApp = "";
+      $.ajax({
+      url: currentAppData.sourceUrl,
+      dataType: 'json',
+      type: 'PUT',
+      data: JSON.stringify(currentAppData.teamData),
+      success: function(data) {
+        run(true);
+        renderSaveButton();
+      }.bind(this),
+        error: function(xhr, status, err) {
+
+          console.error(currentAppData.sourceUrl, status, err.toString());
+
+        }.bind(this)
+      });
+    } else {
+      currentAppData.editApp = app;
+    }
+    run();
+  },
+  handleChange: function(event) {
+    this.setState({value: event.target.value});
+    console.log(event.target.value);
+    
+  },
+  render: function() {
+    var value = this.state.value;
+    var edit = ( undefined != currentAppData.editApp && currentAppData.editApp == this.props.appName) ? true : false;
+    return (
+        <div>{edit ? <span><input type="text" value={value} onChange={this.handleChange} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, 1)} /></span> : <span className="edit" onClick={this.handleClick.bind(null, this.props.appName, 0)}>{this.props.appName}</span>}</div>
+    );
+  }
+});
 
 var FeatureCardGroup = React.createClass({
 
   render: function() {
-    var refresh = this.props.refresh || false;
-    var meta = this.props.meta;
+    var refresh      = this.props.refresh || false;
+    var meta         = this.props.meta;
     var featureNames = Object.keys(this.props.data);
-    var featureData = this.props.data;
-    var featureList = featureNames.map(function (feature) {
+    var featureData  = this.props.data;
+    var featureList  = featureNames.map(function (feature) {
       return (
         <FeatureCard refresh={refresh} data={featureData[feature]} featureName={feature} key={feature} meta={meta} />
       )
@@ -192,7 +236,7 @@ var FeatureCardGroup = React.createClass({
     return (
       <div>
         {featureList}
-        <NewFeatureButton />
+            <NewFeatureButton appname={meta} />
       </div>
     );
   }
@@ -356,29 +400,22 @@ var AttributeFlag = React.createClass({
 });
 
 var NewFeatureButton = React.createClass({
-  handleClick: function(){
+    handleClick: function(){
+      console.log("BUTTON CLICK");
+      var feat = {"attributes":{"exportToBrowser":true},"sbx":1,"dev":1,"stg":0,"int":0,"prd":0};
+      var feats = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[this.props.appname].features;
+      feats["untitled"]= feat;
+      run(true);
+      renderSaveButton();
 
-    $.ajax({
-      url: currentAppData.sourceUrl,
-      dataType: 'json',
-      type: 'PUT',
-      data: JSON.stringify(currentAppData.teamData),
-      success: function(data) {
-        run(true);
-        renderSaveButton();
-      }.bind(this),
-        error: function(xhr, status, err) {
-
-          console.error(currentAppData.sourceUrl, status, err.toString());
-
-        }.bind(this)
-      });
   },
   render: function() {
-    var classes = "btn btn-default btn-lg footer-btn";
+      var classes = "btn btn-default btn-lg footer-btn";
+      var metaData = this.props.meta;
+
     return (
       <div className="row">
-        <button type="button" className={classes} >
+        <button type="button" className={classes} onClick={this.handleClick.bind(null, metaData, this.props.attribName)}>
           <span className="glyphicon glyphicon-plus"></span> Add A Feature Flag
         </button>
       </div>
