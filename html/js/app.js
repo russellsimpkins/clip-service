@@ -369,7 +369,14 @@ var EnvironmentFlag = React.createClass({
 });
 
 var AttributeList = React.createClass({
-
+  handleClick: function(meta) {
+    var d = new Date();
+    var f = "f " + d.getTime();
+    currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[meta.appName].features[meta.featureName].attributes[f] = false;
+    currentAppData.changeCount++;
+    renderSaveButton();
+    run();
+  },
   render: function() {
     var metaData = this.props.meta;
     var attribs = Object.keys(this.props.data);
@@ -381,7 +388,7 @@ var AttributeList = React.createClass({
     });
     return (
       <div className="panel-footer">
-        {flagAttributes}
+        {flagAttributes} <div><i onClick={this.handleClick.bind(null, metaData)} className="fa fa-plus" /></div>
       </div>
     );
   }
