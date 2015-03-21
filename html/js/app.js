@@ -227,8 +227,7 @@ var FeatureTitle = React.createClass({
         app.features[keys[i]] = allFeatures[keys[i]];
       }
       currentAppData.editFeature = "";
-      
-      //saveAppState();
+      saveAppState();
     } else {
       currentAppData.editFeature = feature;
     }
