@@ -578,17 +578,17 @@ var run = function(forceRefresh) {
 }
 var saveAppState = function() {
   $.ajax({
-      url: currentAppData.sourceUrl,
-      dataType: 'json',
-      type: 'PUT',
-      data: JSON.stringify(currentAppData.teamData),
-      success: function(data) {
-        run();
-        renderSaveButton();
-      }.bind(this),
-        error: function(xhr, status, err) {
-          console.error(currentAppData.sourceUrl, status, err.toString());
-        }.bind(this)
+    url: currentAppData.sourceUrl,
+    dataType: 'json',
+    type: 'PUT',
+    data: JSON.stringify(currentAppData.teamData),
+    success: function(data) {
+      run();
+      renderSaveButton();
+    }.bind(this),
+    error: function(xhr, status, err) {
+      console.error(currentAppData.sourceUrl, status, err.toString());
+    }.bind(this)
   });
 }
 var renderSaveButton = function() {
