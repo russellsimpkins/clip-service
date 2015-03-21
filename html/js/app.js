@@ -456,7 +456,13 @@ var AttributeName = React.createClass({
       currentAppData.editAttrib = newName;
     } else {
       // RSS - Modify the currentAppData
+      var apps = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[this.props.meta.appName].features[this.props.meta.featureName].attributes;
+      var s = apps[currentAppData.editAttrib];
+      delete apps[currentAppData.editAttrib];
+      apps[newName] = s;
+      delete currentAppData.editApp;
       saveAppState();
+      run();
     }
     console.log("clicked with: " + newName);
     run();
