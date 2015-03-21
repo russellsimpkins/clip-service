@@ -444,10 +444,11 @@ var NewFeatureButton = React.createClass({
     handleClick: function(){
       var feat = {"attributes":{},"sbx":0,"dev":0,"stg":0,"int":0,"prd":0};
       var feats = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[this.props.appname].features;
-      feats["untitled"]= feat;
-      run();
+      var d = new Date();
+      feats["untitled " + d.getTime()]= feat;
+      currentAppData.changeCount = 1;
       renderSaveButton();
-
+      run();
   },
   render: function() {
       var classes = "btn btn-default btn-lg footer-btn";
@@ -485,6 +486,7 @@ var SaveButton = React.createClass({
     }
     delete currentAppData.restoreData;
     saveAppState();
+    resetData();
   },
   render: function() {
     var classes = "btn btn-default btn-lg btn-danger footer-btn";
@@ -553,7 +555,7 @@ var resetData = function() {
 }
 
 var run = function(forceRefresh) {  
-  resetData();
+  //resetData();
   console.log("currentAppData");
   console.log(currentAppData);
   var refresh = true;
