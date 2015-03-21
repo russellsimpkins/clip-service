@@ -215,7 +215,7 @@ var FeatureDelete = React.createClass({
   },
   render: function() {
     return (
-        <i className="fa fa-scissors" value="save" onClick={this.handleClick.bind(null, this.props.metaData.appName, this.props.metaData.featureName)} />
+        <i className="fa fa-times-circle-o" value="save" onClick={this.handleClick.bind(null, this.props.metaData.appName, this.props.metaData.featureName)} />
     );
   }
 });
