@@ -155,6 +155,10 @@ var ApplicationGroups = React.createClass({
       return false;
     }    
     var refresh = this.props.refresh || false;
+    if (undefined != currentAppData.refreshFeatures && currentAppData.refreshFeatures) {
+      delete currentAppData.refreshFeatures;
+      refresh=true;
+    }
     var appNames = Object.keys(this.state.apps);
     var appData = this.state.apps;
     var appList = appNames.map(function (appName) {
@@ -185,7 +189,6 @@ var ApplicationTitle = React.createClass({
       var appd = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[currentAppData.editApp];
       delete currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[currentAppData.editApp];
       currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[app] = appd;
-      console.log("saving " + app);
       currentAppData.editApp = "";
       saveAppState();
     } else {
@@ -195,8 +198,6 @@ var ApplicationTitle = React.createClass({
   },
   handleChange: function(event) {
     this.setState({value: event.target.value});
-    console.log(event.target.value);
-    
   },
   render: function() {
     var value = this.state.value;
@@ -207,22 +208,51 @@ var ApplicationTitle = React.createClass({
   }
 });
 
-
+var FeatureDelete = React.createClass({
+  handleClick: function(appName, feature) {
+    var app = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[appName];
+    if (undefined == currentAppData.restoreData) {
+      currentAppData.restoreData = {apps:{}};
+      currentAppData.restoreData.apps[appName] = {
+        keys: Object.keys(app.features),
+        features: {}
+      };
+      currentAppData.restoreData.apps[appName].features[feature] = app.features[feature];
+    } else {
+      currentAppData.restoreData.apps[appName].features[feature] = app.features[feature];
+    }
+    delete app.features[feature];
+    currentAppData.changeCount = 1;
+    renderSaveButton();
+    run();
+  },
+  render: function() {
+    return (
+        <i className="fa fa-scissors" value="save" onClick={this.handleClick.bind(null, this.props.metaData.appName, this.props.metaData.featureName)} />
+    );
+  }
+});
 var FeatureTitle = React.createClass({
   getInitialState: function() {
     return {value: this.props.featureName};
   },
   handleClick: function(feature, appName, saveit) {
     if (saveit === 1) {
+
+      // this seems a little odd, but I want to retain the order of the elements
+      // in the features object. To do that, I get the keys remove the old key
+      // add the new key in the same index as the old, then rebuild the features object.
       var app = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[appName];
-      var appd = app.features[currentAppData.editFeature];
+      var appf = app.features[currentAppData.editFeature];
       var keys = Object.keys(app.features);
       var idx  = keys.indexOf(currentAppData.editFeature);
-      keys[idx] = feature;
       var allFeatures = app.features;
-      allFeatures[feature] = appd;
       delete app.features;
       app.features = {};
+      keys[idx] = feature;
+      allFeatures[feature] = appf;
+      
+      // build the features object back up.
       for (var i=0;i<keys.length;++i) {
         app.features[keys[i]] = allFeatures[keys[i]];
       }
@@ -235,8 +265,6 @@ var FeatureTitle = React.createClass({
   },
   handleChange: function(event) {
     this.setState({value: event.target.value});
-    console.log(event.target.value);
-    
   },
   render: function() {
     var value = this.state.value;
@@ -255,6 +283,7 @@ var FeatureCardGroup = React.createClass({
     var meta         = this.props.meta;
     var featureNames = Object.keys(this.props.data);
     var featureData  = this.props.data;
+
     var featureList  = featureNames.map(function (feature) {
       return (
         <FeatureCard refresh={refresh} data={featureData[feature]} featureName={feature} key={feature} meta={meta} />
@@ -282,6 +311,7 @@ var FeatureCard = React.createClass({
         <div className="panel panel-default bootcards-summary">
           <div className="panel-heading">
         <h3 className="panel-title"><FeatureTitle featureName={metaData.featureName} appName={metaData.appName} /></h3>
+        <FeatureDelete metaData={metaData} />
           </div>
           <div className="panel-body">
             <div className="row">
@@ -378,9 +408,6 @@ var AttributeFlag = React.createClass({
     })
   },
   handleClick: function(meta, attrib) {
-
-    console.log('CLICK', meta, attrib);
-
     // Change the data in the main object for saving later
     var tIdx = currentAppData.tokenIndex;
     var val = currentAppData.teamData.tokens[tIdx].apps[meta.appName].features[meta.featureName]["attributes"][attrib];
@@ -428,11 +455,10 @@ var AttributeFlag = React.createClass({
 
 var NewFeatureButton = React.createClass({
     handleClick: function(){
-      console.log("BUTTON CLICK");
-      var feat = {"attributes":{"exportToBrowser":true},"sbx":1,"dev":1,"stg":0,"int":0,"prd":0};
+      var feat = {"attributes":{},"sbx":0,"dev":0,"stg":0,"int":0,"prd":0};
       var feats = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[this.props.appname].features;
       feats["untitled"]= feat;
-      run(true);
+      run();
       renderSaveButton();
 
   },
@@ -451,11 +477,34 @@ var NewFeatureButton = React.createClass({
 });
 
 var SaveButton = React.createClass({
-  handleClick: function(){
+  handleClick: function(restore){
+    // this is a little complicated - maybe there's a more reactjs way to do this
+    // I will go through and restore any features that were removed by checking to see
+    // which keys in the restore data are missing in the app data.
+    if (restore === 1 && undefined != currentAppData.restoreData) {
+      var apps = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps;
+      var keys = Object.keys(apps);
+      for (var index = 0; index < keys.length; ++index) {
+        var appkey = keys[index];
+        if (undefined != currentAppData.restoreData.apps[appkey]) {
+          for (var idx = 0; idx < currentAppData.restoreData.apps[appkey].keys.length; idx++) {
+            var featurekey = currentAppData.restoreData.apps[appkey].keys[idx];
+            if (undefined == apps[appkey].features[featurekey]) {
+              apps[appkey].features[featurekey] = currentAppData.restoreData.apps[appkey].features[featurekey];
+            }
+          }
+        }
+      }
+    }
+    delete currentAppData.restoreData;
     saveAppState();
   },
   render: function() {
     var classes = "btn btn-default btn-lg btn-danger footer-btn";
+    var restoreClass = "btn btn-default btn-lg btn-info footer-btn";
+    if (undefined == currentAppData.restoreData) {
+      restoreClass +=  ' hidden'
+    }
     if (currentAppData.changeCount === 1 && currentAppData.saveButtonVisibile === false) {
       currentAppData.saveButtonVisibile = true;
       classes += " fade-in";
@@ -472,6 +521,9 @@ var SaveButton = React.createClass({
       <div className="footer">
         <button type="button" className={classes} onClick={this.handleClick}>
           <span className="glyphicon glyphicon-floppy-disk"></span> Save
+      </button>
+        <button type="button" className={restoreClass} onClick={this.handleClick.bind(null,1)}>
+          <span className="fa fa-undo"></span> Undo
         </button>
       </div>
     );
@@ -516,11 +568,13 @@ var resetData = function() {
   currentAppData.team = currentAppData.team || getQueryVariable('team') || '';
 }
 
-var run = function(forceRefresh) {
+var run = function(forceRefresh) {  
   resetData();
+  console.log("currentAppData");
   console.log(currentAppData);
+  var refresh = true;
   // Main APP
-  React.render(<MainScreen refresh={forceRefresh} />, document.getElementById('content'));
+  React.render(<MainScreen refresh={refresh}  />, document.getElementById('content'));
 }
 var saveAppState = function() {
   $.ajax({
@@ -529,13 +583,11 @@ var saveAppState = function() {
       type: 'PUT',
       data: JSON.stringify(currentAppData.teamData),
       success: function(data) {
-        run(true);
+        run();
         renderSaveButton();
       }.bind(this),
         error: function(xhr, status, err) {
-
           console.error(currentAppData.sourceUrl, status, err.toString());
-
         }.bind(this)
   });
 }
