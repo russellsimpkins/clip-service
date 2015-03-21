@@ -134,19 +134,6 @@ var ApplicationGroups = React.createClass({
     return { apps: currentAppData.teamData.tokens[currentAppData.tokenIndex].apps };
   },
 
-  componentDidMount: function() {
-    if (!this.state.apps) {
-      //TODO
-      // $.get(this.props.source, function(result) {
-      //   if (this.isMounted()) {
-      //     this.setState({
-      //       apps: JSON.parse(result)
-      //     });
-      //   }
-      // }.bind(this));
-    }
-  },
-  
   render: function() {
     $('#teamNav').removeClass('active');
     $('#tokenNav').removeClass('active');
@@ -555,9 +542,6 @@ var MainScreen = React.createClass({
     );
   }
 });
-
-
-//var teamData = {"teams":[{"teamName":"IOS"},{"teamName":"MobileWeb"},{"teamName":"Data Universe"},{"teamName":"WebTech"},{"teamName":"Search"}]};
 
 var currentAppData = {};
 
