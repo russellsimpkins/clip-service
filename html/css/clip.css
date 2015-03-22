@@ -15,7 +15,12 @@ body {
 .panel {
   border-radius: 0;
 }
-
+.save {
+   padding-left: 5px;
+}
+.pad5 {
+   padding-left: 5px;
+}
 .bootcards-summary .panel-body > .row > div {
   padding: 2px;
   cursor: pointer;
