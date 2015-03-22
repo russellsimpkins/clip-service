@@ -146,8 +146,8 @@ var ApplicationGroups = React.createClass({
       delete currentAppData.refreshFeatures;
       refresh=true;
     }
-    var appNames = Object.keys(this.state.apps);
-    var appData = this.state.apps;
+    var appNames = Object.keys(currentAppData.teamData.tokens[currentAppData.tokenIndex].apps);
+    var appData = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps;
     var appList = appNames.map(function (appName) {
     
     return (
@@ -168,9 +168,19 @@ var ApplicationGroups = React.createClass({
 });
 
 function saveAppTitle(app) {
-  var appd = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[currentAppData.editApp];
-  delete currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[currentAppData.editApp];
-  currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[app] = appd;
+  var apps = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps;
+  var keys = Object.keys(apps);
+  var what = keys.indexOf(currentAppData.editApp);
+  currentAppData.teamData.tokens[currentAppData.tokenIndex].apps = {};
+  var appd = apps[currentAppData.editApp];
+  delete apps[currentAppData.editApp];
+  for (var idx = 0; idx < keys.length; ++idx) {
+    if (idx == what) {
+      currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[app] = appd;
+    } else {
+      currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[keys[idx]] = apps[keys[idx]];
+    }
+  }
   currentAppData.editApp = "";
   saveAppState();
 }
