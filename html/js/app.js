@@ -467,10 +467,19 @@ var AttributeFlag = React.createClass({
   }
 });
 function saveAttribute(value, attribute, feature, appname) {
-  var apps = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[appname].features[feature].attributes;
-  var s = apps[currentAppData.editAttrib];
-  delete apps[currentAppData.editAttrib];
-  apps[value] = s;
+  var feat = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[appname].features[feature];
+  var attr = feat.attributes;
+  feat.attributes = {};
+  var keys = Object.keys(attr);
+  var what = keys.indexOf(currentAppData.editAttrib);
+  var s = attr[currentAppData.editAttrib];
+  for (var idx = 0; idx < keys.length; ++idx) {
+    if ( idx == what ) {
+      feat.attributes[value] = s;
+    } else {
+      feat.attributes[keys[idx]] = attr[keys[idx]];
+    }
+  }
   delete currentAppData.editApp;
   saveAppState();
 }
