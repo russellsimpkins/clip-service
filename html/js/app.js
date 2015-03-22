@@ -440,7 +440,7 @@ var AttributeFlag = React.createClass({
     return (
       <span>
         <a className={classes} onClick={this.handleClick.bind(null, metaData, this.props.attribName)}>
-        <i className={iconClasses}></i></a><AttributeName meta={metaData} attrib={this.props.attribName} />
+ <i className={iconClasses}></i></a><AttributeName meta={metaData} attrib={this.props.attribName} />
         {this.state.change ? <span className="label label-danger">!</span> : ''}<br/>
       </span>
     );
@@ -476,8 +476,7 @@ var AttributeName = React.createClass({
     var edit = ( undefined != currentAppData.editAttrib && currentAppData.editAttrib == this.props.attrib) ? true : false;
     
     return (
-      
-        <div>{edit ? <span><input type="text" value={value} onChange={this.handleChange} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, 1)} /></span> : <span className="edit" onClick={this.handleClick.bind(null, this.props.attrib, 0)}>{this.props.attrib}</span>}</div>
+        <span className="pad5">{edit ? <span><input type="text" value={value} onChange={this.handleChange} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, 1)} /></span> : <span className="edit" onClick={this.handleClick.bind(null, this.props.attrib, 0)}>{this.props.attrib}</span>}</span>
     );
   }
 });
