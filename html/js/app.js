@@ -167,17 +167,21 @@ var ApplicationGroups = React.createClass({
   }
 });
 
+function saveAppTitle(app) {
+  var appd = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[currentAppData.editApp];
+  delete currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[currentAppData.editApp];
+  currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[app] = appd;
+  currentAppData.editApp = "";
+  saveAppState();
+}
+
 var ApplicationTitle = React.createClass({
   getInitialState: function() {
     return {value: this.props.appName};
   },
   handleClick: function(app, saveit) {
     if (saveit === 1) {
-      var appd = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[currentAppData.editApp];
-      delete currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[currentAppData.editApp];
-      currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[app] = appd;
-      currentAppData.editApp = "";
-      saveAppState();
+      saveAppTitle(app);
     } else {
       currentAppData.editApp = app;
     }
@@ -186,11 +190,17 @@ var ApplicationTitle = React.createClass({
   handleChange: function(event) {
     this.setState({value: event.target.value});
   },
+  onKeyPress: function(event) {
+    if (event.charCode === 13) {
+      saveAppTitle(event.target.value);
+      run();
+    }
+  },
   render: function() {
     var value = this.state.value;
     var edit = ( undefined != currentAppData.editApp && currentAppData.editApp == this.props.appName) ? true : false;
     return (
-        <div>{edit ? <span><input type="text" value={value} onChange={this.handleChange} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, 1)} /></span> : <span className="edit" onClick={this.handleClick.bind(null, this.props.appName, 0)}>{this.props.appName}</span>}</div>
+        <div>{edit ? <span><input type="text" value={value} onChange={this.handleChange} onKeyPress={this.onKeyPress} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, 1)} /></span> : <span className="edit" onClick={this.handleClick.bind(null, this.props.appName, 0)}>{this.props.appName}</span>}</div>
     );
   }
 });
@@ -388,7 +398,7 @@ var AttributeList = React.createClass({
     });
     return (
       <div className="panel-footer">
-        {flagAttributes} <div><i onClick={this.handleClick.bind(null, metaData)} className="fa fa-plus" /></div>
+        {flagAttributes} <div><span onClick={this.handleClick.bind(null, metaData)}><i className="fa fa-plus" /><span className="pad5">Add boolen attribute</span></span></div>
       </div>
     );
   }
@@ -446,7 +456,14 @@ var AttributeFlag = React.createClass({
     );
   }
 });
-
+function saveAttribute(value, attribute, feature, appname) {
+  var apps = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[appname].features[feature].attributes;
+  var s = apps[currentAppData.editAttrib];
+  delete apps[currentAppData.editAttrib];
+  apps[value] = s;
+  delete currentAppData.editApp;
+  saveAppState();
+}
 var AttributeName = React.createClass({
   getInitialState: function() {
     return {value: this.props.attrib};
@@ -455,17 +472,21 @@ var AttributeName = React.createClass({
     if (save === 0) {
       currentAppData.editAttrib = newName;
     } else {
-      // RSS - Modify the currentAppData
-      var apps = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[this.props.meta.appName].features[this.props.meta.featureName].attributes;
-      var s = apps[currentAppData.editAttrib];
-      delete apps[currentAppData.editAttrib];
-      apps[newName] = s;
-      delete currentAppData.editApp;
-      saveAppState();
+      saveAttribute(event.target.value,
+                    currentAppData.editAttrib,
+                    this.props.meta.featureName,
+                    this.props.meta.appName);
+    }
+    run();
+  },
+  onKeyPress: function(event) {
+    if (event.charCode === 13) {
+      saveAttribute(event.target.value,
+                    currentAppData.editAttrib,
+                    this.props.meta.featureName,
+                    this.props.meta.appName);
       run();
     }
-    console.log("clicked with: " + newName);
-    run();
   },
   handleChange: function(event) {
     this.setState({value: event.target.value});
@@ -476,7 +497,7 @@ var AttributeName = React.createClass({
     var edit = ( undefined != currentAppData.editAttrib && currentAppData.editAttrib == this.props.attrib) ? true : false;
     
     return (
-        <span className="pad5">{edit ? <span><input type="text" value={value} onChange={this.handleChange} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, 1)} /></span> : <span className="edit" onClick={this.handleClick.bind(null, this.props.attrib, 0)}>{this.props.attrib}</span>}</span>
+        <span className="pad5">{edit ? <span><input type="text" value={value} onChange={this.handleChange} onKeyPress={this.onKeyPress} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, 1)} /></span> : <span className="edit" onClick={this.handleClick.bind(null, this.props.attrib, 0)}>{this.props.attrib}</span>}</span>
     );
   }
 });
