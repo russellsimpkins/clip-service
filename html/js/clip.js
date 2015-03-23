@@ -9,7 +9,7 @@ DU.Clip = function() {
   this.data = {teams: [],
                team: {},
                selectedTeam: "",
-               tokenIndex: -1,
+               currentToken: -1,
                changeCount: 0,
                saveButtonVisibile: false,
                refreshFeatures: false,
@@ -136,6 +136,12 @@ DU.Clip.prototype.hasRestore = function() {
   return (undefined == this.data.restoreData);
 };
 
+DU.Clip.prototype.getRestoreData = function() {
+  if (undefined != this.data.restoreData)
+    return this.data.restoreData;
+  return {apps:{}};
+};
+
 // TODO - this hosed things, finish this feature
 DU.Clip.prototype.updateAppName = function(appname) {
   var apps = this.getApps();
@@ -224,14 +230,14 @@ DU.Clip.prototype.deleteFeature = function(feature, appName) {
   if (undefined == this.data.restoreData) {
     this.data.restoreData = {apps:{}};
     this.data.restoreData.apps[appName] = {
-      keys: Object.keys(app.features),
+      keys: Object.keys(app[appName].features),
       features: {}
     };
-    this.data.restoreData.apps[appName].features[feature] = app.features[feature];
+    this.data.restoreData.apps[appName].features[feature] = app[appName].features[feature];
   } else {
-    this.data.restoreData.apps[appName].features[feature] = app.features[feature];
+    this.data.restoreData.apps[appName].features[feature] = app[appName].features[feature];
   }
-  delete app.features[feature];
+  delete app[appName].features[feature];
   this.data.changeCount = 1;
 };
 
@@ -261,17 +267,35 @@ DU.Clip.prototype.restore = function() {
   // this is a little complicated - maybe there's a more reactjs way to do this
   // I will go through and restore any features that were removed by checking to see
   // which keys in the restore data are missing in the app data.
-
+  $.ajax({
+    url: this.data.sourceUrl,
+    dataType: 'json',
+    type: 'GET',
+    data: null,
+    success: function(data) {
+      this.data.changeCount = 0;
+      this.setTeam(data);
+      this.setToken(this.data.currentToken);
+      run();
+      renderSaveButton();
+    }.bind(this),
+    error: function(xhr, status, err) {
+      console.error(this.data.sourceUrl, status, err.toString());
+    }.bind(this)
+  });
+  return;
   var apps = this.getApps();
   var keys = this.getAppNames();
-  var rdata = this.getRestoreData();
-  for (var index = 0; index < keys.length; ++index) {
-    var appkey = keys[index];
-    if (undefined != rdata.apps[appkey]) {
-      for (var idx = 0; idx < rata.apps[appkey].keys.length; idx++) {
-        var featurekey = rata.apps[appkey].keys[idx];
-        if (undefined == apps[appkey].features[featurekey]) {
-          apps[appkey].features[featurekey] = rdata.apps[appkey].features[featurekey];
+  if (this.hasRestore()) {
+    var rdata = this.getRestoreData();
+    for (var index = 0; index < keys.length; ++index) {
+      var appkey = keys[index];
+      if (undefined != rdata.apps[appkey]) {
+        for (var idx = 0; idx < rata.apps[appkey].keys.length; idx++) {
+          var featurekey = rata.apps[appkey].keys[idx];
+          if (undefined == apps[appkey].features[featurekey]) {
+            apps[appkey].features[featurekey] = rdata.apps[appkey].features[featurekey];
+          }
         }
       }
     }
@@ -281,6 +305,14 @@ DU.Clip.prototype.restore = function() {
   this.incrChange();
   
 };
+
+DU.Clip.prototype.resetData = function() {
+  store.changeCount(0);
+  store.setButtonVisible(false);
+  var team = store.selectedTeam() || getQueryVariable('team') || '';
+  store.selectTeam(team);
+};
+
 DU.Clip.prototype.save = function() {
   $.ajax({
     url: this.data.sourceUrl,
