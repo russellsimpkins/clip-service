@@ -276,7 +276,8 @@ DU.Clip.prototype.restore = function() {
       this.data.changeCount = 0;
       this.setTeam(data);
       this.setToken(this.data.currentToken);
-      run();
+      this.resetData();
+      run(true);
       renderSaveButton();
     }.bind(this),
     error: function(xhr, status, err) {
@@ -307,8 +308,8 @@ DU.Clip.prototype.restore = function() {
 };
 
 DU.Clip.prototype.resetData = function() {
-  store.changeCount(0);
-  store.setButtonVisible(false);
+  this.changeCount(0);
+  this.setButtonVisible(false);
   var team = store.selectedTeam() || getQueryVariable('team') || '';
   store.selectTeam(team);
 };
