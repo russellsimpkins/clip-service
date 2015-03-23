@@ -339,12 +339,13 @@ var EnvironmentFlag = React.createClass({
     renderSaveButton();
     run();
   },
+  componentWillReceiveProps:function(nextProps) {
+    if (nextProps.meta.refresh) {
+      this.setState({change:false});
+    }
+  },
   render: function() {
     var metaData = this.props.meta;
-    if (metaData.refresh) {
-      // i read we should not do this, but it works
-      this.state.change = false;
-    }
     var classes = "bootcards-summary-item";
     if (this.props.data) {
       classes += " active";
