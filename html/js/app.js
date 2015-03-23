@@ -1,5 +1,8 @@
 "use strict";
 
+var Team = $(location).attr('hash').substring(("#team=").length);
+var store = new DU.Clip();
+
 var getQueryVariable = function(variable) {
   var query = window.location.search.substring(1);
   var vars = query.split("&");
@@ -20,7 +23,9 @@ var TeamList = React.createClass({
 
   componentDidMount: function() {
     $.get(this.props.source, function(result) {
+      console.log(1);
       if (this.isMounted()) {
+        store.setTeams(JSON.parse(result));
         this.setState({
           teamList: JSON.parse(result)
         });
@@ -55,7 +60,7 @@ var TeamList = React.createClass({
 
 var Team = React.createClass({
   handleClick: function(event) {
-    currentAppData.team = this.props.data;
+    store.selectTeam(this.props.data);
     run();
   },
   render: function() {
@@ -82,7 +87,7 @@ var TokenList = React.createClass({
         this.setState({
           teamData: jsonData
         });
-        currentAppData.teamData = jsonData;
+        store.setTeam(jsonData);
       }
     }.bind(this));
   },
@@ -91,6 +96,7 @@ var TokenList = React.createClass({
     $('#teamNav').removeClass('active');
     $('#tokenNav').addClass('active');
     $('#appNav').removeClass('active');
+    
     if ($.isEmptyObject(this.state.teamData)) {
       return false;
     }
@@ -115,7 +121,7 @@ var TokenList = React.createClass({
 
 var Token = React.createClass({
   handleClick: function(event) {
-    currentAppData.tokenIndex = this.props.tokenIndex;
+    store.setToken(this.props.tokenIndex);
     run();
   },
   render: function() {
@@ -131,7 +137,7 @@ var Token = React.createClass({
 var ApplicationGroups = React.createClass({
 
   getInitialState: function() {
-    return { apps: currentAppData.teamData.tokens[currentAppData.tokenIndex].apps };
+    return { apps: store.getApps() };
   },
 
   render: function() {
@@ -142,14 +148,12 @@ var ApplicationGroups = React.createClass({
       return false;
     }    
     var refresh = this.props.refresh || false;
-    if (undefined != currentAppData.refreshFeatures && currentAppData.refreshFeatures) {
-      delete currentAppData.refreshFeatures;
-      refresh=true;
+    if (store.doRefresh()) {
+      refresh = true;
     }
-    var appNames = Object.keys(currentAppData.teamData.tokens[currentAppData.tokenIndex].apps);
-    var appData = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps;
+    var appNames = store.getAppNames();
+    var appData = store.getApps();
     var appList = appNames.map(function (appName) {
-    
     return (
         <div className="col-sm-12" key={appName}>
         <h3 className="col-sm-12 row">Application: <ApplicationTitle appName={appName} /></h3><NewAppButton />
@@ -167,23 +171,6 @@ var ApplicationGroups = React.createClass({
   }
 });
 
-function saveAppTitle(app) {
-  var apps = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps;
-  var keys = Object.keys(apps);
-  var what = keys.indexOf(currentAppData.editApp);
-  currentAppData.teamData.tokens[currentAppData.tokenIndex].apps = {};
-  var appd = apps[currentAppData.editApp];
-  delete apps[currentAppData.editApp];
-  for (var idx = 0; idx < keys.length; ++idx) {
-    if (idx == what) {
-      currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[app] = appd;
-    } else {
-      currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[keys[idx]] = apps[keys[idx]];
-    }
-  }
-  currentAppData.editApp = "";
-  saveAppState();
-}
 
 var ApplicationTitle = React.createClass({
   getInitialState: function() {
@@ -191,9 +178,9 @@ var ApplicationTitle = React.createClass({
   },
   handleClick: function(app, saveit) {
     if (saveit === 1) {
-      saveAppTitle(app);
+      store.updateAppName(app);
     } else {
-      currentAppData.editApp = app;
+      store.setEditApp(app);
     }
     run();
   },
@@ -202,13 +189,13 @@ var ApplicationTitle = React.createClass({
   },
   onKeyPress: function(event) {
     if (event.charCode === 13) {
-      saveAppTitle(event.target.value);
+      store.updateAppName(event.target.value);
       run();
     }
   },
   render: function() {
     var value = this.state.value;
-    var edit = ( undefined != currentAppData.editApp && currentAppData.editApp == this.props.appName) ? true : false;
+    var edit = (store.editApp() == this.props.appName);
     return (
         <div>{edit ? <span><input type="text" value={value} onChange={this.handleChange} onKeyPress={this.onKeyPress} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, 1)} /></span> : <span className="edit" onClick={this.handleClick.bind(null, this.props.appName, 0)}>{this.props.appName}</span>}</div>
     );
@@ -217,19 +204,7 @@ var ApplicationTitle = React.createClass({
 
 var FeatureDelete = React.createClass({
   handleClick: function(appName, feature) {
-    var app = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[appName];
-    if (undefined == currentAppData.restoreData) {
-      currentAppData.restoreData = {apps:{}};
-      currentAppData.restoreData.apps[appName] = {
-        keys: Object.keys(app.features),
-        features: {}
-      };
-      currentAppData.restoreData.apps[appName].features[feature] = app.features[feature];
-    } else {
-      currentAppData.restoreData.apps[appName].features[feature] = app.features[feature];
-    }
-    delete app.features[feature];
-    currentAppData.changeCount = 1;
+    store.deleteFeature(feature, appName);
     renderSaveButton();
     run();
   },
@@ -239,45 +214,35 @@ var FeatureDelete = React.createClass({
     );
   }
 });
+
 var FeatureTitle = React.createClass({
   getInitialState: function() {
     return {value: this.props.featureName};
   },
   handleClick: function(feature, appName, saveit) {
     if (saveit === 1) {
-
-      // this seems a little odd, but I want to retain the order of the elements
-      // in the features object. To do that, I get the keys remove the old key
-      // add the new key in the same index as the old, then rebuild the features object.
-      var app = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[appName];
-      var appf = app.features[currentAppData.editFeature];
-      var keys = Object.keys(app.features);
-      var idx  = keys.indexOf(currentAppData.editFeature);
-      var allFeatures = app.features;
-      delete app.features;
-      app.features = {};
-      keys[idx] = feature;
-      allFeatures[feature] = appf;
-      
-      // build the features object back up.
-      for (var i=0;i<keys.length;++i) {
-        app.features[keys[i]] = allFeatures[keys[i]];
-      }
-      currentAppData.editFeature = "";
-      saveAppState();
+      store.updateFeature(feature, appName);
+      store.save();
     } else {
-      currentAppData.editFeature = feature;
+      store.setEditFeature(feature);
     }
     run();
+  },
+  onKeyPress: function(event, appName) {
+    if (event.charCode === 13) {
+      store.updateFeature(event.target.value, this.props.appName);
+      store.save();
+      run();
+    }
   },
   handleChange: function(event) {
     this.setState({value: event.target.value});
   },
   render: function() {
     var value = this.state.value;
-    var edit = ( undefined != currentAppData.editFeature && currentAppData.editFeature == this.props.featureName) ? true : false;
+    var edit = ( store.editFeature() == this.props.featureName);
     return (
-        <div>{edit ? <span><input type="text" value={value} onChange={this.handleChange} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, this.props.appName, 1)} /></span> : <span className="edit" onClick={this.handleClick.bind(null, this.props.featureName, this.props.appName, 0)}>{this.props.featureName}</span>}</div>
+        <div>{edit ? <span><input type="text" value={value} onChange={this.handleChange} onKeyPress={this.onKeyPress} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, this.props.appName, 1)} /></span> : <span className="edit" onClick={this.handleClick.bind(null, this.props.featureName, this.props.appName, 0)}>{this.props.featureName}</span>}</div>
     );
     }
   
@@ -288,6 +253,9 @@ var FeatureCardGroup = React.createClass({
   render: function() {
     var refresh      = this.props.refresh || false;
     var meta         = this.props.meta;
+    if (undefined == this.props.data) {
+      this.props.data = [];
+    }
     var featureNames = Object.keys(this.props.data);
     var featureData  = this.props.data;
 
@@ -309,9 +277,9 @@ var FeatureCardGroup = React.createClass({
 var FeatureCard = React.createClass({
   render: function() {
     var metaData = {
-      appName: this.props.meta,
+      appName:     this.props.meta,
       featureName: this.props.featureName,
-      refresh: this.props.refresh
+      refresh:     this.props.refresh
     };
     return (
       <div className="col-sm-4">
@@ -345,21 +313,21 @@ var EnvironmentFlag = React.createClass({
     })
   },
   handleClick: function(meta, env) {
-
+    // RSS - left off here
     // Change the data in the main object for saving later
-    var tIdx = currentAppData.tokenIndex;
-    var val = currentAppData.teamData.tokens[tIdx].apps[meta.appName].features[meta.featureName][env];
+    var val = store.featureValue(meta.appName, meta.featureName, env);
     if (val == 0) {
       val = 1;
     } else {
       val = 0;
     }
-    currentAppData.teamData.tokens[tIdx].apps[meta.appName].features[meta.featureName][env] = val;
+    store.setFeatureValue(meta.appName, meta.featureName, env, val);
+    
 
     if (this.state.change === false) {
-      currentAppData.changeCount++;
+      store.incrChange();
     } else {
-      currentAppData.changeCount--;
+      store.decChange();
     }
 
     this.setState({
@@ -392,8 +360,8 @@ var AttributeList = React.createClass({
   handleClick: function(meta) {
     var d = new Date();
     var f = "f " + d.getTime();
-    currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[meta.appName].features[meta.featureName].attributes[f] = false;
-    currentAppData.changeCount++;
+    store.addAttribute(meta.appName, meta.featureName, f, false);
+    store.incrChange();
     renderSaveButton();
     run();
   },
@@ -408,7 +376,7 @@ var AttributeList = React.createClass({
     });
     return (
       <div className="panel-footer">
-        {flagAttributes} <div><span onClick={this.handleClick.bind(null, metaData)}><i className="fa fa-plus" /><span className="pad5">Add boolen attribute</span></span></div>
+        {flagAttributes} <div><span onClick={this.handleClick.bind(null, metaData)}><i className="fa fa-plus" /><span className="pad5">Add</span></span></div>
       </div>
     );
   }
@@ -423,20 +391,11 @@ var AttributeFlag = React.createClass({
   },
   handleClick: function(meta, attrib) {
     // Change the data in the main object for saving later
-    var tIdx = currentAppData.tokenIndex;
-    var val = currentAppData.teamData.tokens[tIdx].apps[meta.appName].features[meta.featureName]["attributes"][attrib];
-    if (val == true) {
-      val = false;
-    } else {
-      val = true;
-    }
-    currentAppData.teamData.tokens[tIdx].apps[meta.appName].features[meta.featureName]["attributes"][attrib] = val;
-
-
+    store.toggleAttribute(meta.appName,meta.featureName,attrib);
     if (this.state.change === false) {
-      currentAppData.changeCount++;
+      store.incrChange();
     } else {
-      currentAppData.changeCount--;
+      store.decChange();
     }
     this.setState({
       active: !this.state.active,
@@ -466,44 +425,26 @@ var AttributeFlag = React.createClass({
     );
   }
 });
-function saveAttribute(value, attribute, feature, appname) {
-  var feat = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[appname].features[feature];
-  var attr = feat.attributes;
-  feat.attributes = {};
-  var keys = Object.keys(attr);
-  var what = keys.indexOf(currentAppData.editAttrib);
-  var s = attr[currentAppData.editAttrib];
-  for (var idx = 0; idx < keys.length; ++idx) {
-    if ( idx == what ) {
-      feat.attributes[value] = s;
-    } else {
-      feat.attributes[keys[idx]] = attr[keys[idx]];
-    }
-  }
-  delete currentAppData.editApp;
-  saveAppState();
-}
+
 var AttributeName = React.createClass({
   getInitialState: function() {
     return {value: this.props.attrib};
   },
   handleClick: function(newName, save) {
     if (save === 0) {
-      currentAppData.editAttrib = newName;
+      store.storeEditAttribute(newName);
     } else {
-      saveAttribute(event.target.value,
-                    currentAppData.editAttrib,
-                    this.props.meta.featureName,
-                    this.props.meta.appName);
+      store.saveAttribute(event.target.value,
+                          this.props.meta.featureName,
+                          this.props.meta.appName);
     }
     run();
   },
   onKeyPress: function(event) {
     if (event.charCode === 13) {
-      saveAttribute(event.target.value,
-                    currentAppData.editAttrib,
-                    this.props.meta.featureName,
-                    this.props.meta.appName);
+      store.saveAttribute(event.target.value,
+                          this.props.meta.featureName,
+                          this.props.meta.appName);
       run();
     }
   },
@@ -513,7 +454,7 @@ var AttributeName = React.createClass({
   render: function() {
     var meta = this.props.meta;
     var value = this.state.value;
-    var edit = ( undefined != currentAppData.editAttrib && currentAppData.editAttrib == this.props.attrib) ? true : false;
+    var edit = ( store.editAttribute() == this.props.attrib) ? true : false;
     
     return (
         <span className="pad5">{edit ? <span><input type="text" value={value} onChange={this.handleChange} onKeyPress={this.onKeyPress} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, 1)} /></span> : <span className="edit" onClick={this.handleClick.bind(null, this.props.attrib, 0)}>{this.props.attrib}</span>}</span>
@@ -523,10 +464,9 @@ var AttributeName = React.createClass({
 var NewFeatureButton = React.createClass({
     handleClick: function(){
       var feat = {"attributes":{},"sbx":0,"dev":0,"stg":0,"int":0,"prd":0};
-      var feats = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps[this.props.appname].features;
       var d = new Date();
-      feats["untitled " + d.getTime()]= feat;
-      currentAppData.changeCount = 1;
+      var key = "untitled " + d.getTime();
+      store.addFeature(key, feat, this.props.appname);
       renderSaveButton();
       run();
   },
@@ -546,13 +486,7 @@ var NewFeatureButton = React.createClass({
 
 var NewAppButton = React.createClass({
   handleClick: function(){
-    var feat = {"attributes":{},"sbx":0,"dev":0,"stg":0,"int":0,"prd":0};
-      
-    var d = new Date();
-    var feats = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps["New APP " + d.getTime()] = {};
-    feats.features = {};
-    feats["untitled " + d.getTime()]= feat;
-    currentAppData.changeCount = 1;
+    store.addApp();
     renderSaveButton();
     run();
   },
@@ -575,41 +509,29 @@ var SaveButton = React.createClass({
     // this is a little complicated - maybe there's a more reactjs way to do this
     // I will go through and restore any features that were removed by checking to see
     // which keys in the restore data are missing in the app data.
-    if (restore === 1 && undefined != currentAppData.restoreData) {
-      var apps = currentAppData.teamData.tokens[currentAppData.tokenIndex].apps;
-      var keys = Object.keys(apps);
-      for (var index = 0; index < keys.length; ++index) {
-        var appkey = keys[index];
-        if (undefined != currentAppData.restoreData.apps[appkey]) {
-          for (var idx = 0; idx < currentAppData.restoreData.apps[appkey].keys.length; idx++) {
-            var featurekey = currentAppData.restoreData.apps[appkey].keys[idx];
-            if (undefined == apps[appkey].features[featurekey]) {
-              apps[appkey].features[featurekey] = currentAppData.restoreData.apps[appkey].features[featurekey];
-            }
-          }
-        }
-      }
+    if (restore === 1) {
+      store.restore();
     }
-    delete currentAppData.restoreData;
-    saveAppState();
+    store.save();
     resetData();
+    run();
   },
   render: function() {
     var classes = "btn btn-default btn-lg btn-danger footer-btn";
     var restoreClass = "btn btn-default btn-lg btn-info footer-btn";
-    if (undefined == currentAppData.restoreData) {
+    if (store.hasRestore()) {
       restoreClass +=  ' hidden'
     }
-    if (currentAppData.changeCount === 1 && currentAppData.saveButtonVisibile === false) {
-      currentAppData.saveButtonVisibile = true;
+    if (store.changeCount() === 1 && store.isButtonVisible() === false) {
+      store.setButtonVisibile(true);
       classes += " fade-in";
     }
-    else if (currentAppData.changeCount === 0 && currentAppData.saveButtonVisibile === true) {
-      currentAppData.saveButtonVisibile = false;
+    else if (store.changeCount() === 0 && store.isButtonVisible() === true) {
+      store.setButtonVisibile(false);
       classes += " fade-out";
     }
-    else if (currentAppData.changeCount == 0) {
-      currentAppData.saveButtonVisibile = false
+    else if (store.changeCount() == 0) {
+      store.setButtonVisible(false);
       classes += " hidden";
     }
     return (
@@ -626,20 +548,16 @@ var SaveButton = React.createClass({
 });
 
 var MainScreen = React.createClass({
-
   selectApp: function() {
-    var sourceUrl;
-
-    if (!currentAppData.team) {
-      return <TeamList source="/svc/clip/teams" />;
+    var sourceUrl = "/svc/clip/teams";
+    if (!store.isTeamSelected()) {
+      return <TeamList source={sourceUrl} />;
     }
-
-    currentAppData.sourceUrl = "/svc/clip/team/" + currentAppData.team
-    if (!currentAppData.teamData) {
-      return <TokenList source={currentAppData.sourceUrl} />;
+    sourceUrl = "/svc/clip/team/" + store.selectedTeam();
+    if (store.token() == -1) {
+      return <TokenList source={sourceUrl} />;
     }
-
-    return <ApplicationGroups refresh={this.props.refresh} source={currentAppData.sourceUrl} />;
+    return <ApplicationGroups refresh={this.props.refresh} source={sourceUrl} />;
   },
   render: function() {
     var app = this.selectApp();
@@ -654,26 +572,27 @@ var MainScreen = React.createClass({
 var currentAppData = {};
 
 var resetData = function() {
-  currentAppData.changeCount = 0;
-  currentAppData.saveButtonVisibile = false;
+  store.changeCount(0);
+  store.setButtonVisible(false);
+  //store.token(-1);
   console.log(getQueryVariable('team'));
-  currentAppData.team = currentAppData.team || getQueryVariable('team') || '';
+  var team = store.selectedTeam() || getQueryVariable('team') || '';
+  store.selectTeam(team);
 }
 
 var run = function(forceRefresh) {  
-  //resetData();
-  console.log("currentAppData");
-  console.log(currentAppData);
+  console.log(store.team());
   var refresh = true;
   // Main APP
   React.render(<MainScreen refresh={refresh}  />, document.getElementById('content'));
 }
+
 var saveAppState = function() {
   $.ajax({
     url: currentAppData.sourceUrl,
     dataType: 'json',
     type: 'PUT',
-    data: JSON.stringify(currentAppData.teamData),
+    data: JSON.stringify(store.team()),
     success: function(data) {
       run();
       renderSaveButton();
@@ -683,6 +602,7 @@ var saveAppState = function() {
     }.bind(this)
   });
 }
+
 var renderSaveButton = function() {
   React.render(<SaveButton />, document.getElementById('footer'));
 }
