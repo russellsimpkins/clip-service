@@ -244,7 +244,7 @@ var FeatureTitle = React.createClass({
   },
   render: function() {
     var value = this.state.value;
-    var edit = ( store.editFeature() == this.props.featureName);
+    var edit = (store.editFeature() == this.props.featureName);
     return (
         <div>{edit ? <span><input type="text" value={value} onChange={this.handleChange} onKeyPress={this.onKeyPress} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, this.props.appName, 1)} /></span> : <span className="edit" onClick={this.handleClick.bind(null, this.props.featureName, this.props.appName, 0)}>{this.props.featureName}</span>}</div>
     );
@@ -317,8 +317,6 @@ var EnvironmentFlag = React.createClass({
     })
   },
   handleClick: function(meta, env) {
-    // RSS - left off here
-    // Change the data in the main object for saving later
     var val = store.featureValue(meta.appName, meta.featureName, env);
     if (val == 0) {
       val = 1;
@@ -326,7 +324,6 @@ var EnvironmentFlag = React.createClass({
       val = 0;
     }
     store.setFeatureValue(meta.appName, meta.featureName, env, val);
-    
 
     if (this.state.change === false) {
       store.incrChange();
@@ -345,10 +342,11 @@ var EnvironmentFlag = React.createClass({
   render: function() {
     var metaData = this.props.meta;
     if (metaData.refresh) {
+      // i read we should not do this, but it works
       this.state.change = false;
     }
     var classes = "bootcards-summary-item";
-    if (this.state.active) {
+    if (this.props.data) {
       classes += " active";
     }
     return (
@@ -521,9 +519,10 @@ var SaveButton = React.createClass({
     // which keys in the restore data are missing in the app data.
     if (restore === 1) {
       store.restore();
+      return;
     }
-    //store.save();
-    store.resetData();
+    store.save();
+    //store.resetData();
     run();
   },
   render: function() {
