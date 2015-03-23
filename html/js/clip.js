@@ -276,9 +276,9 @@ DU.Clip.prototype.restore = function() {
       this.data.changeCount = 0;
       this.setTeam(data);
       this.setToken(this.data.currentToken);
-      this.resetData();
-      run(true);
+      this.resetData();      
       renderSaveButton();
+      run(true);
     }.bind(this),
     error: function(xhr, status, err) {
       console.error(this.data.sourceUrl, status, err.toString());
@@ -311,7 +311,7 @@ DU.Clip.prototype.resetData = function() {
   this.changeCount(0);
   this.setButtonVisible(false);
   var team = store.selectedTeam() || getQueryVariable('team') || '';
-  store.selectTeam(team);
+  this.selectTeam(team);
 };
 
 DU.Clip.prototype.save = function() {
@@ -322,7 +322,7 @@ DU.Clip.prototype.save = function() {
     data: JSON.stringify(this.team()),
     success: function(data) {
       this.data.changeCount = 0;
-      run();
+      run(true);
       renderSaveButton();
     }.bind(this),
     error: function(xhr, status, err) {
