@@ -338,6 +338,7 @@ var EnvironmentFlag = React.createClass({
       active: !this.state.active,
       change: !this.state.change
     });
+    console.log(this.state);
     renderSaveButton();
     run();
   },
@@ -585,7 +586,9 @@ var currentAppData = {};
 
 var run = function(forceRefresh) {  
   console.log(store.team());
-  var refresh = true;
+  var refresh = false;
+  if (forceRefresh)
+    refresh = true;
   // Main APP
   React.render(<MainScreen refresh={refresh}  />, document.getElementById('content'));
 }
