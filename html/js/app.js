@@ -191,6 +191,7 @@ var ApplicationTitle = React.createClass({
   onKeyPress: function(event) {
     if (event.charCode === 13) {
       store.updateAppName(event.target.value);
+      renderSaveButton();
       run();
     }
   },
@@ -395,7 +396,8 @@ var AttributeFlag = React.createClass({
   },
   handleClick: function(meta, attrib) {
     // Change the data in the main object for saving later
-    store.toggleAttribute(meta.appName,meta.featureName,attrib);
+    store.toggleAttribute(meta.appName, meta.featureName, attrib);
+    
     if (this.state.change === false) {
       store.incrChange();
     } else {
@@ -519,15 +521,16 @@ var SaveButton = React.createClass({
     if (restore === 1) {
       store.restore();
     }
-    store.save();
-    resetData();
+    //store.save();
+    store.resetData();
     run();
   },
   render: function() {
     var classes = "btn btn-default btn-lg btn-danger footer-btn";
     var restoreClass = "btn btn-default btn-lg btn-info footer-btn";
     if (store.hasRestore()) {
-      restoreClass +=  ' hidden'
+      // restoreClass +=  ' hidden';
+      
     }
     if (store.changeCount() === 1 && store.isButtonVisible() === false) {
       store.setButtonVisibile(true);
@@ -536,10 +539,12 @@ var SaveButton = React.createClass({
     else if (store.changeCount() === 0 && store.isButtonVisible() === true) {
       store.setButtonVisibile(false);
       classes += " fade-out";
+      restoreClass += ' hidden';
     }
     else if (store.changeCount() == 0) {
       store.setButtonVisible(false);
       classes += " hidden";
+      restoreClass += ' hidden';
     }
     return (
       <div className="footer">
@@ -577,15 +582,6 @@ var MainScreen = React.createClass({
 });
 
 var currentAppData = {};
-
-var resetData = function() {
-  store.changeCount(0);
-  store.setButtonVisible(false);
-  //store.token(-1);
-  console.log(getQueryVariable('team'));
-  var team = store.selectedTeam() || getQueryVariable('team') || '';
-  store.selectTeam(team);
-}
 
 var run = function(forceRefresh) {  
   console.log(store.team());
