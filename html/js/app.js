@@ -179,6 +179,7 @@ var ApplicationTitle = React.createClass({
   handleClick: function(app, saveit) {
     if (saveit === 1) {
       store.updateAppName(app);
+      renderSaveButton();
     } else {
       store.setEditApp(app);
     }
@@ -222,7 +223,8 @@ var FeatureTitle = React.createClass({
   handleClick: function(feature, appName, saveit) {
     if (saveit === 1) {
       store.updateFeature(feature, appName);
-      store.save();
+      //store.save();
+      renderSaveButton();
     } else {
       store.setEditFeature(feature);
     }
@@ -231,7 +233,8 @@ var FeatureTitle = React.createClass({
   onKeyPress: function(event, appName) {
     if (event.charCode === 13) {
       store.updateFeature(event.target.value, this.props.appName);
-      store.save();
+      renderSaveButton();
+      //store.save();
       run();
     }
   },
@@ -335,6 +338,7 @@ var EnvironmentFlag = React.createClass({
       change: !this.state.change
     });
     renderSaveButton();
+    run();
   },
   render: function() {
     var metaData = this.props.meta;
@@ -402,6 +406,7 @@ var AttributeFlag = React.createClass({
       change: !this.state.change
     });
     renderSaveButton();
+    run();
   },
   render: function() {
     var metaData = this.props.meta;
@@ -437,6 +442,7 @@ var AttributeName = React.createClass({
       store.saveAttribute(event.target.value,
                           this.props.meta.featureName,
                           this.props.meta.appName);
+      renderSaveButton();
     }
     run();
   },
@@ -445,6 +451,7 @@ var AttributeName = React.createClass({
       store.saveAttribute(event.target.value,
                           this.props.meta.featureName,
                           this.props.meta.appName);
+      renderSaveButton();
       run();
     }
   },
