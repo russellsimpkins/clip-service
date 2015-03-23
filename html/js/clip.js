@@ -154,7 +154,7 @@ DU.Clip.prototype.updateAppName = function(appname) {
     }
   }
   this.incrChange();
-  store.save();
+  //store.save();
 };
 
 DU.Clip.prototype.addAttribute = function(app, feature, attrib, value) {
@@ -191,7 +191,7 @@ DU.Clip.prototype.saveAttribute = function(value, feature, app) {
     }
   }
   delete this.data.editAttrib;
-  this.save();
+  this.incrChange();
 };
 
 DU.Clip.prototype.featureValue = function(app, feature, env) {
@@ -254,7 +254,7 @@ DU.Clip.prototype.updateFeature = function(feature, appName) {
     app.features[keys[i]] = allFeatures[keys[i]];
   }
   this.data.editFeature = "";
-  store.save();
+  this.incrChange();
 };
 
 DU.Clip.prototype.restore = function() {
@@ -278,8 +278,8 @@ DU.Clip.prototype.restore = function() {
   }
 
   delete this.data.restoreData;
-  store.save();
-  resetData();
+  this.incrChange();
+  
 };
 DU.Clip.prototype.save = function() {
   $.ajax({
@@ -296,4 +296,5 @@ DU.Clip.prototype.save = function() {
       console.error(data.sourceUrl, status, err.toString());
     }.bind(this)
   });
+  this.resetData();
 };
