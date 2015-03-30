@@ -175,6 +175,11 @@ DU.Clip.prototype.addAttribute = function(app, feature, attrib, value) {
   this.data.team.tokens[this.data.currentToken].apps[app].features[feature].attributes[attrib] = value;
 };
 
+DU.Clip.prototype.deleteAttribute = function(app, feature, attrib, value) {
+  delete this.data.team.tokens[this.data.currentToken].apps[app].features[feature].attributes[attrib];
+  this.incrChange();
+};
+
 DU.Clip.prototype.toggleAttribute = function(app, feature, attrib) {
   this.data.team.tokens[this.data.currentToken].apps[app].features[feature].attributes[attrib] =
     !(this.data.team.tokens[this.data.currentToken].apps[app].features[feature].attributes[attrib]);

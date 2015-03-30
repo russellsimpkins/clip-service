@@ -436,6 +436,11 @@ var AttributeName = React.createClass({
   getInitialState: function() {
     return {value: this.props.attrib};
   },
+  handleDelete: function(attrib, meta) {
+    store.deleteAttribute(meta.appName, meta.featureName, attrib);
+    renderSaveButton();
+    run();
+  },
   handleClick: function(newName, save) {
     if (save === 0) {
       store.storeEditAttribute(newName);
@@ -465,7 +470,7 @@ var AttributeName = React.createClass({
     var edit = ( store.editAttribute() == this.props.attrib) ? true : false;
     
     return (
-        <span className="pad5">{edit ? <span><input type="text" value={value} onChange={this.handleChange} onKeyPress={this.onKeyPress} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, 1)} /></span> : <span className="edit" onClick={this.handleClick.bind(null, this.props.attrib, 0)}>{this.props.attrib}</span>}</span>
+        <span className="pad5">{edit ? <span><input type="text" value={value} onChange={this.handleChange} onKeyPress={this.onKeyPress} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, 1)} /></span> : <span><span className="edit" onClick={this.handleClick.bind(null, this.props.attrib, 0)}>{this.props.attrib}</span><i className="pad5 fa fa-times-circle-o" value="delete" onClick={this.handleDelete.bind(null, this.props.attrib, this.props.meta)} /></span>}</span>
     );
   }
 });
