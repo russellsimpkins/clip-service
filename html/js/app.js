@@ -153,18 +153,21 @@ var ApplicationGroups = React.createClass({
     }
     var appNames = store.getAppNames();
     var appData = store.getApps();
+    // <h3 className="col-sm-12 row">Application: </h3>
     var appList = appNames.map(function (appName) {
     return (
-        <div className="col-sm-12" key={appName}>
-        <h3 className="col-sm-12 row">Application: <ApplicationTitle appName={appName} /></h3><NewAppButton />
-          <div className="row">
+        <div className="panel panel-info" key={appName}>
+        <div className="panel-heading"><ApplicationTitle appName={appName} /></div>
+          <div className="panel-body">
             <FeatureCardGroup refresh={refresh} data={appData[appName].features} meta={appName}/>
           </div>
         </div>
+
       );
     });
     return (
       <div>
+        <NewAppButton />
         {appList}
       </div>
     );
@@ -175,6 +178,11 @@ var ApplicationGroups = React.createClass({
 var ApplicationTitle = React.createClass({
   getInitialState: function() {
     return {value: this.props.appName};
+  },
+  handleDelete: function(app) {
+    store.deleteApp(app);
+    renderSaveButton();
+    run(true);
   },
   handleClick: function(app, saveit) {
     if (saveit === 1) {
@@ -199,23 +207,11 @@ var ApplicationTitle = React.createClass({
     var value = this.state.value;
     var edit = (store.editApp() == this.props.appName);
     return (
-        <div>{edit ? <span><input type="text" value={value} onChange={this.handleChange} onKeyPress={this.onKeyPress} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, 1)} /></span> : <span className="edit" onClick={this.handleClick.bind(null, this.props.appName, 0)}>{this.props.appName}</span>}</div>
+        <div className="panel-title">{edit ? <span><input type="text" value={value} onChange={this.handleChange} onKeyPress={this.onKeyPress} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, 1)} /></span> : <span><span className="edit" onClick={this.handleClick.bind(null, this.props.appName, 0)}>{this.props.appName}</span><i className="pad5 fa fa-times-circle-o" value="delete" onClick={this.handleDelete.bind(null, this.props.appName)} /> <NewFeatureButton appname={this.props.appName} /></span>}</div>
     );
   }
 });
 
-var FeatureDelete = React.createClass({
-  handleClick: function(appName, feature) {
-    store.deleteFeature(feature, appName);
-    renderSaveButton();
-    run();
-  },
-  render: function() {
-    return (
-        <i className="fa fa-times-circle-o" value="save" onClick={this.handleClick.bind(null, this.props.metaData.appName, this.props.metaData.featureName)} />
-    );
-  }
-});
 
 var FeatureTitle = React.createClass({
   getInitialState: function() {
@@ -230,6 +226,11 @@ var FeatureTitle = React.createClass({
       store.setEditFeature(feature);
     }
     run();
+  },
+  handleDelete: function(feature, app) {
+    store.deleteFeature(feature, app);
+    renderSaveButton();
+    run(true);
   },
   onKeyPress: function(event, appName) {
     if (event.charCode === 13) {
@@ -246,7 +247,7 @@ var FeatureTitle = React.createClass({
     var value = this.state.value;
     var edit = (store.editFeature() == this.props.featureName);
     return (
-        <div>{edit ? <span><input type="text" value={value} onChange={this.handleChange} onKeyPress={this.onKeyPress} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, this.props.appName, 1)} /></span> : <span className="edit" onClick={this.handleClick.bind(null, this.props.featureName, this.props.appName, 0)}>{this.props.featureName}</span>}</div>
+        <div>{edit ? <span><input type="text" value={value} onChange={this.handleChange} onKeyPress={this.onKeyPress} size="20"></input><i className="fa fa-floppy-o save" value="save" onClick={this.handleClick.bind(null, this.state.value, this.props.appName, 1)} /></span> : <span><span className="edit" onClick={this.handleClick.bind(null, this.props.featureName, this.props.appName, 0)}>{this.props.featureName}</span><i className="pad5 fa fa-times-circle-o" value="delete" onClick={this.handleDelete.bind(null, this.props.featureName, this.props.appName)} /></span>}</div>
     );
     }
   
@@ -269,9 +270,8 @@ var FeatureCardGroup = React.createClass({
       )
     });
     return (
-      <div>
+      <div>        
         {featureList}
-            <NewFeatureButton appname={meta} />
       </div>
     );
   }
@@ -290,7 +290,6 @@ var FeatureCard = React.createClass({
         <div className="panel panel-default bootcards-summary">
           <div className="panel-heading">
         <h3 className="panel-title"><FeatureTitle featureName={metaData.featureName} appName={metaData.appName} /></h3>
-        <FeatureDelete metaData={metaData} />
           </div>
           <div className="panel-body">
             <div className="row">
@@ -480,15 +479,14 @@ var NewFeatureButton = React.createClass({
       run();
   },
   render: function() {
-      var classes = "btn btn-default btn-lg footer-btn";
+      var classes = "fa fa-plus";
       var metaData = this.props.meta;
 
     return (
-      <div className="row">
-        <button type="button" className={classes} onClick={this.handleClick.bind(null, metaData, this.props.attribName)}>
-          <span className="glyphicon glyphicon-plus"></span> Add A Feature Flag
-        </button>
-      </div>
+      <span>
+        <i className={classes} onClick={this.handleClick.bind(null, metaData, this.props.attribName)}>
+        </i>
+      </span>
     );
   }
 });
@@ -497,7 +495,7 @@ var NewAppButton = React.createClass({
   handleClick: function(){
     store.addApp();
     renderSaveButton();
-    run();
+    run(true);
   },
   render: function() {
       var classes = "btn btn-default btn-lg footer-btn";

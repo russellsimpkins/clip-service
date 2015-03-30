@@ -82,6 +82,14 @@ DU.Clip.prototype.editApp = function(app) {
   return "";
 };
 
+DU.Clip.prototype.deleteApp = function(app) {
+  if (undefined != this.data.team.tokens[this.data.currentToken].apps[app]) {
+    delete this.data.team.tokens[this.data.currentToken].apps[app];
+    this.data.appNames = Object.keys(this.data.team.tokens[this.data.currentToken].apps);
+    this.incrChange();
+  }
+};
+
 DU.Clip.prototype.addApp = function() {
   var feat = {"attributes":{},"sbx":0,"dev":0,"stg":0,"int":0,"prd":0};      
   var d = new Date();
