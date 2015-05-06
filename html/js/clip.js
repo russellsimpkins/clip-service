@@ -96,6 +96,7 @@ DU.Clip.prototype.addApp = function() {
   var feats = this.data.team.tokens[this.data.currentToken].apps["New APP " + d.getTime()] = {};
   feats.features = {};
   feats["untitled " + d.getTime()] = feat;
+  this.data.appNames = Object.keys(this.data.team.tokens[this.data.currentToken].apps);
   this.incrChange();
 };
 
