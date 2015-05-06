@@ -227,6 +227,8 @@ DU.Clip.prototype.setEditFeature = function(feature) {
 };
 
 DU.Clip.prototype.addFeature = function(key, feature, app) {
+  if (undefined == this.data.team.tokens[this.data.currentToken].apps[app].features)
+    this.data.team.tokens[this.data.currentToken].apps[app].features = {};
   this.data.team.tokens[this.data.currentToken].apps[app].features[key] = feature;
   this.incrChange();
 };
