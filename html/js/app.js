@@ -1,20 +1,34 @@
 "use strict";
+/**
+ * This was created as my buddy and I started learning ReactJS, so
+ * please forgive anything "junior" you see, but do feel free to offer
+ * constructive criticism
+ */
 
 var Team = $(location).attr('hash').substring(("#team=").length);
+
+// see clip.js for this little jem
 var store = new DU.Clip();
 
+// one way to get the value of a query string variable
 var getQueryVariable = function(variable) {
   var query = window.location.search.substring(1);
   var vars = query.split("&");
   for (var i=0;i<vars.length;i++) {
     var pair = vars[i].split("=");
-    if(pair[0] == variable){
+    if (pair[0] == variable){
       return pair[1];
     }
   }
   return(false);
 };
 
+/****
+ * reactjs from here down. React is kinda cool, but it does require you put a lot of stuff onto 
+ * your mental stage. So, I think that I need to create something in a readme or wiki to discuss
+ * the pages of the app. The code below dynamically constructs our page components. Our HTML is 
+ * very small.
+ ****/
 var TeamList = React.createClass({
 
   getInitialState: function() {
