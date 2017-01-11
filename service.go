@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/russellsimpkins/clip"
 	"net/http"
 	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/russellsimpkins/clip"
 )
 
 func HelloWorld(writer http.ResponseWriter, req *http.Request) {
