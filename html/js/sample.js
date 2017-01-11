@@ -13,7 +13,7 @@ $( document ).ready(function() {
 function getFeatures() {
     var data = {"requests": [{
         "id": "1",
-        "url": "http://localhost/svc/clip/team/Test/token/132050dbf258529724f0c1a711c666f76c5a72d53bf83329fe65728bb679cad1/MobileWeb",
+        "url": "http://localhost/svc/clip/team/Test/token/effaa180c18ac3fcfb1020e6f78f9380ff4de87b7cf4448d711cba3c327c8d50/MobileWeb",
         "method": "GET"
     }, {
         "id": "2",
@@ -40,19 +40,19 @@ function getFeatures() {
                 weather = JSON.parse(res.responses[1].payload);
                 console.log(weather);
             }
-            if (flags.features.useAmazonDirectMatch.dev) {
+            if (flags.features.showWeatherFinder.dev) {
                 console.log("Showing Finder");
                 //$("#wFinder").toggleClass("hidden");
                 if (weather.status == "OK") {
                     $("#wQuery").val(weather.results.current[0].city);
                 }
-                $("#wFinder").fadeIn(3500);
+                $("#wFinder").fadeIn(1000);
                 
             }
-            if (flags.features.usePapiForBlogs.dev) {
+            if (undefined != flags.features.showCurrentWeather && flags.features.showCurrentWeather.dev) {
                 console.log("Showing Current");
 
-                $("#wCurrent").fadeIn(1500);
+                $("#wCurrent").fadeIn(1000);
             }
             console.log(res);
         },
